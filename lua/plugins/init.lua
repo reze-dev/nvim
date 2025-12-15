@@ -95,20 +95,28 @@ return {
       require("dapui").setup()
     end,
   },
-
   {
     "saecki/crates.nvim",
     ft = { "toml" },
     config = function()
       require("crates").setup {
+        lsp = {
+          enabled = true,
+          on_attach = function(client, bufnr)
+            -- same on_attach as other servers
+          end,
+          actions = true,
+          completion = true,
+          hover = true,
+        },
+
         completion = {
-          cmp = {
-            enabled = true,
+          crates = {
+            enabled = true, -- Disabled by default
+            max_results = 8, -- Max search results
+            min_chars = 3, -- Min chars before completion
           },
         },
-      }
-      require("cmp").setup.buffer {
-        sources = { { name = "crates" } },
       }
     end,
   },
