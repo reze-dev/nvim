@@ -1,5 +1,25 @@
 local M = {}
 
+M.lsp = {
+  n = {
+    ["<leader>ca"] = {
+      function()
+        vim.lsp.buf.code_action()
+      end,
+      "LSP code action",
+    },
+  },
+
+  v = {
+    ["<leader>ca"] = {
+      function()
+        vim.lsp.buf.code_action()
+      end,
+      "LSP code action",
+    },
+  },
+}
+
 M.dap = {
   plugin = true,
   n = {

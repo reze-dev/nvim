@@ -71,3 +71,9 @@ vim.api.nvim_create_autocmd("BufReadPost", {
     end
   end,
 })
+
+vim.api.nvim_create_autocmd("LspAttach", {
+  callback = function()
+    load_mappings "lsp"
+  end,
+})
