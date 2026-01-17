@@ -22,7 +22,13 @@ require("lazy").setup({
     import = "nvchad.plugins",
   },
 
-  { import = "plugins" },
+  { import = "plugins.coding" },
+  { import = "plugins.debug" },
+  { import = "plugins.go" },
+  { import = "plugins.rust" },
+  { import = "plugins.ui" },
+  { import = "plugins.navigation" },
+  { import = "plugins.overrides" },
 }, lazy_config)
 
 -- load theme
