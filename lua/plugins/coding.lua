@@ -34,6 +34,8 @@ return {
         "rust",
         "go",
         "nix",
+        "dart",
+        "yaml",
       },
       auto_install = true,
     },

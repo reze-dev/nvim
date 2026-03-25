@@ -24,6 +24,7 @@ require("lazy").setup({
 
   { import = "plugins.coding" },
   { import = "plugins.debug" },
+  { import = "plugins.flutter" },
   { import = "plugins.go" },
   { import = "plugins.rust" },
   { import = "plugins.ui" },
