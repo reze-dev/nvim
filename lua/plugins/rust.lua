@@ -2,33 +2,70 @@ return {
   {
     "mrcjkb/rustaceanvim",
     version = "^5", -- Recommended
-    lazy = false, -- This plugin is already lazy
     ft = "rust",
-    config = function()
-      local mason_registry = require "mason-registry"
-      local codelldb = vim.fn.expand "$MASON/packages/codelldb"
-      local extension_path = codelldb .. "/extension/"
-      local codelldb_path = extension_path .. "adapter/codelldb"
-      local liblldb_path = extension_path .. "lldb/lib/liblldb.so"
-      local on_attach = require("nvchad.configs.lspconfig").on_attach
-      local capabilities = require("nvchad.configs.lspconfig").capabilities
-      local cfg = require "rustaceanvim.config"
+    init = function()
+      vim.g.rustaceanvim = function()
+        local nvlsp = require "nvchad.configs.lspconfig"
+        local cfg = require "rustaceanvim.config"
+        local extension_path = vim.fs.joinpath(vim.fn.expand "$MASON", "packages", "codelldb", "extension")
+        local codelldb_path = vim.fs.joinpath(extension_path, "adapter", "codelldb")
+        local liblldb_path = vim.fs.joinpath(extension_path, "lldb", "lib", "liblldb.so")
+        local dap = { autoload_configurations = true }
 
-      vim.g.rustaceanvim = {
-        server = {
-          on_attach = on_attach,
-          capabilities = capabilities,
-        },
-        dap = {
-          adapter = cfg.get_codelldb_adapter(codelldb_path, liblldb_path),
-        },
-      }
+        if vim.fn.executable(codelldb_path) == 1 and vim.uv.fs_stat(liblldb_path) then
+          dap.adapter = cfg.get_codelldb_adapter(codelldb_path, liblldb_path)
+          dap.adapter.name = "codelldb"
+          dap.configuration = {
+            name = "Rust debug",
+            type = "codelldb",
+            request = "launch",
+            stopOnEntry = false,
+            sourceLanguages = { "rust" },
+          }
+        end
+
+        return {
+          server = {
+            on_attach = nvlsp.on_attach,
+            capabilities = nvlsp.capabilities,
+            default_settings = {
+              ["rust-analyzer"] = {
+                cargo = {
+                  allFeatures = true,
+                },
+                check = {
+                  command = "clippy",
+                },
+              },
+            },
+          },
+          dap = dap,
+        }
+      end
     end,
     keys = {
       {
-        "<Leader>drt",
+        "<Leader>rd",
+        "<cmd>RustLsp debuggables<CR>",
+        desc = "Rust debug target",
+        ft = "rust",
+      },
+      {
+        "<Leader>rr",
+        "<cmd>RustLsp runnables<CR>",
+        desc = "Rust run target",
+        ft = "rust",
+      },
+      {
+        "<Leader>rt",
         "<cmd>RustLsp testables<CR>",
-        desc = "Rust Debugger testables",
+        desc = "Rust test target",
+        ft = "rust",
+      },
+      {
+        "<Leader>re",
+        "<cmd>RustLsp explainError<CR>",
+        desc = "Rust explain error",
         ft = "rust",
       },
       {
@@ -40,14 +77,6 @@ return {
         ft = "rust",
       },
     },
-  },
-
-  {
-    "rust-lang/rust.vim",
-    ft = "rust",
-    init = function()
-      vim.g.rustfmt_autosave = 1
-    end,
   },
 
   {
