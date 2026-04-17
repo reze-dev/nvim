@@ -1,7 +1,16 @@
 return {
   {
     "akinsho/flutter-tools.nvim",
-    lazy = false,
+    ft = "dart",
+    cmd = {
+      "FlutterRun",
+      "FlutterQuit",
+      "FlutterOutlineToggle",
+      "FlutterDevices",
+      "FlutterEmulators",
+      "FlutterReload",
+      "FlutterRestart",
+    },
     dependencies = {
       "nvim-lua/plenary.nvim",
       "stevearc/dressing.nvim", -- for better UI
