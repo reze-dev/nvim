@@ -3,9 +3,15 @@ require("nvchad.configs.lspconfig").defaults()
 local nvlsp = require "nvchad.configs.lspconfig"
 
 local servers = { "html", "cssls", "nil_ls", "gopls", "clangd" }
-vim.lsp.enable(servers)
 
 -- override server-specific config:
+
+for _, server in ipairs { "html", "cssls" } do
+  vim.lsp.config(server, {
+    on_attach = nvlsp.on_attach,
+    capabilities = nvlsp.capabilities,
+  })
+end
 
 vim.lsp.config("nil_ls", {
   autostart = true,
@@ -51,16 +57,10 @@ vim.lsp.config("clangd", {
       nvlsp.on_attach(client, bufnr)
     end
     if client.server_capabilities.inlayHintProvider then
-      vim.lsp.inlay_hint.enable(true)
+      vim.lsp.inlay_hint.enable(true, { bufnr = bufnr })
     end
   end,
   capabilities = nvlsp.capabilities,
 })
 
--- For formatting on save:
-vim.api.nvim_create_autocmd("BufWritePre", {
-  pattern = "*.go",
-  callback = function()
-    vim.lsp.buf.format { async = false }
-  end,
-})
+vim.lsp.enable(servers)
