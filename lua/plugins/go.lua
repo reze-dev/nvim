@@ -10,7 +10,7 @@ return {
       {
         "<Leader>dgt",
         function()
-          require("dap_go").debug_test()
+          require("dap-go").debug_test()
         end,
         desc = "Debugger run Golang test",
         ft = "go",
@@ -18,7 +18,7 @@ return {
       {
         "<Leader>dgl",
         function()
-          require("dap_go").debug_last()
+          require("dap-go").debug_last_test()
         end,
         desc = "Debugger run last Golang test",
         ft = "go",
