@@ -38,7 +38,7 @@ return {
 
   {
     "nvim-treesitter/nvim-treesitter",
-    branch = "master",
+    branch = "main",
     build = ":TSUpdate",
     opts = {
       ensure_installed = treesitter_languages,
