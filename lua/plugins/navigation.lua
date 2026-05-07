@@ -84,4 +84,56 @@ return {
       vim.g.tmux_navigator_no_mappings = 1
     end,
   },
+
+  {
+    "folke/flash.nvim",
+    event = "VeryLazy",
+    ---@type Flash.Config
+    opts = {},
+    -- stylua: ignore
+    keys = {
+      { "s", mode = { "n", "x", "o" }, function() require("flash").jump() end, desc = "Flash" },
+      { "S", mode = { "n", "x", "o" }, function() require("flash").treesitter() end, desc = "Flash Treesitter" },
+      { "r", mode = "o", function() require("flash").remote() end, desc = "Remote Flash" },
+      { "R", mode = { "o", "x" }, function() require("flash").treesitter_search() end, desc = "Treesitter Search" },
+      { "<c-s>", mode = { "c" }, function() require("flash").toggle() end, desc = "Toggle Flash Search" },
+    },
+  },
+
+  {
+    "folke/persistence.nvim",
+    event = "BufReadPre",
+    opts = {
+      -- add any options here
+    },
+    keys = {
+      {
+        "<leader>qs",
+        function()
+          require("persistence").load()
+        end,
+        desc = "Restore Session",
+      },
+      {
+        "<leader>ql",
+        function()
+          require("persistence").load { last = true }
+        end,
+        desc = "Restore Last Session",
+      },
+      {
+        "<leader>qd",
+        function()
+          require("persistence").stop()
+        end,
+        desc = "Don't Save Current Session",
+      },
+    },
+  },
+
+  {
+    "sindrets/diffview.nvim",
+    cmd = { "DiffviewOpen", "DiffviewFileHistory" },
+    opts = {},
+  },
 }
