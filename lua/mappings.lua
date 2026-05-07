@@ -7,6 +7,20 @@ local map = vim.keymap.set
 map("n", ";", ":", { desc = "CMD enter command mode" })
 map("i", "jk", "<ESC>")
 
+-- Disable NvChad's default Alt+h terminal mapping
+pcall(vim.keymap.del, { "n", "t", "i" }, "<A-h>")
+
+-- Remap NvChad's horizontal terminal to Alt+f
+map({ "n", "t", "i" }, "<A-f>", function()
+  require("nvchad.term").toggle { pos = "sp", id = "htoggle" }
+end, { desc = "Terminal Toggle Horizontal" })
+
+-- Insert mode movement
+map("i", "<A-h>", "<Left>", { desc = "Move Left" })
+map("i", "<A-j>", "<Down>", { desc = "Move Down" })
+map("i", "<A-k>", "<Up>", { desc = "Move Up" })
+map("i", "<A-l>", "<Right>", { desc = "Move Right" })
+
 vim.keymap.set("n", "<leader>ti", function()
   vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled { bufnr = 0 }, { bufnr = 0 })
 end, { desc = "Toggle Inlay Hints" })
