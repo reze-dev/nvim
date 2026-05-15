@@ -10,12 +10,14 @@ use feel ready without turning the config into a maze.
 
 - Base: NvChad `v2.5`
 - Plugin manager: `lazy.nvim`
-- Theme: `nord`
+- Theme: `rosepine`
 - LSP: Neovim's native `vim.lsp` API
 - Formatting: `conform.nvim`
 - Debugging: `nvim-dap`, `nvim-dap-ui`, `rustaceanvim`, `nvim-dap-go`
-- Navigation: Harpoon, Oil, vim-tmux-navigator
-- Treesitter: pinned to `master` for the classic NvChad-compatible setup
+- UI/QoL: `noice.nvim`, `trouble.nvim`, `todo-comments.nvim`, `snacks.nvim`
+- Tasks: `overseer.nvim`
+- Navigation: Harpoon, Oil, Telescope, vim-tmux-navigator
+- Treesitter: `main` branch with the current Treesitter setup
 
 ## Layout
 
@@ -116,10 +118,26 @@ when the program exits; use `<leader>du` when you want to hide it.
 | `<leader>H` | Open Harpoon menu |
 | `<leader>1..4` | Jump to Harpoon entry |
 | `<leader>o` | Open Oil |
+| `<leader>O` | Toggle floating Oil |
 | `<C-h>` | Move left through tmux/Neovim panes |
 | `<C-j>` | Move down through tmux/Neovim panes |
 | `<C-k>` | Move up through tmux/Neovim panes |
 | `<C-l>` | Move right through tmux/Neovim panes |
+
+## Tasks
+
+Project tasks are handled by `overseer.nvim`. Use it for one-off commands,
+detected project tasks, and repeated build/test/run workflows.
+
+| Key | Action |
+| --- | --- |
+| `<leader>or` | Pick and run a task |
+| `<leader>ot` | Toggle task list |
+| `<leader>oq` | Open task quick actions |
+| `<leader>oc` | Run an arbitrary shell command as a task |
+
+VS Code tasks report diagnostics through Neovim diagnostics and can be viewed
+through Trouble.
 
 ## Editing Keys
 
@@ -128,6 +146,8 @@ when the program exits; use `<leader>du` when you want to hide it.
 | `;` | Enter command mode |
 | `jk` | Escape insert mode |
 | `<leader>ti` | Toggle LSP inlay hints |
+| `<leader>z` | Open a scratch buffer |
+| `<leader>Z` | Select a scratch buffer |
 
 ## External Tools
 
@@ -160,7 +180,6 @@ nvim --headless -u init.lua '+Lazy load nvim-dap' '+lua print(package.loaded.dap
 ## Maintenance Notes
 
 - Keep `lazy-lock.json` committed when plugin versions change.
-- `nvim-treesitter` is pinned to `master` because this config uses the classic
-  NvChad-compatible Treesitter setup.
+- `nvim-treesitter` follows its `main` branch in this config.
 - Use `:Lazy sync` after changing plugin specs.
 - Use `:Mason` to inspect or install external LSP/debug/formatter tools.
