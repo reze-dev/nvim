@@ -9,7 +9,48 @@ return {
     "folke/noice.nvim",
     event = "VeryLazy",
     opts = {
-      -- add any options here
+      lsp = {
+        progress = {
+          enabled = true,
+          view = "mini",
+        },
+        hover = {
+          enabled = true,
+          silent = true,
+        },
+        signature = {
+          enabled = true,
+          auto_open = {
+            enabled = true,
+            trigger = true,
+            luasnip = true,
+            throttle = 50,
+          },
+        },
+      },
+      presets = {
+        bottom_search = true,
+        command_palette = true,
+        long_message_to_split = true,
+        lsp_doc_border = true,
+      },
+      routes = {
+        {
+          filter = {
+            event = "msg_show",
+            kind = "",
+            find = "written",
+          },
+          opts = { skip = true },
+        },
+        {
+          filter = {
+            event = "msg_show",
+            kind = "search_count",
+          },
+          opts = { skip = true },
+        },
+      },
     },
     dependencies = {
       "MunifTanjim/nui.nvim",
@@ -75,6 +116,18 @@ return {
     dependencies = { "nvim-lua/plenary.nvim" },
     opts = {},
     event = "BufRead",
+    keys = {
+      {
+        "<leader>xt",
+        "<cmd>TodoTrouble<CR>",
+        desc = "Todo comments (Trouble)",
+      },
+      {
+        "<leader>st",
+        "<cmd>TodoTelescope<CR>",
+        desc = "Todo comments (Telescope)",
+      },
+    },
   },
 
   {
