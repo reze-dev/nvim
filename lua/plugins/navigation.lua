@@ -55,7 +55,49 @@ return {
 
   {
     "stevearc/oil.nvim",
-    opts = {},
+    opts = {
+      default_file_explorer = true,
+      columns = {
+        "icon",
+        "permissions",
+        "size",
+      },
+      delete_to_trash = true,
+      skip_confirm_for_simple_edits = true,
+      lsp_file_methods = {
+        autosave_changes = true,
+      },
+      keymaps = {
+        ["g?"] = "actions.show_help",
+        ["<C-h>"] = false,
+        ["<C-l>"] = false,
+        ["<C-p>"] = "actions.preview",
+        ["<leader>oh"] = "actions.toggle_hidden",
+        ["<leader>od"] = "actions.open_cwd",
+      },
+      view_options = {
+        show_hidden = true,
+        natural_order = true,
+        sort = {
+          { "type", "asc" },
+          { "name", "asc" },
+        },
+      },
+      float = {
+        border = "rounded",
+        max_width = 0.9,
+        max_height = 0.85,
+      },
+      confirmation = {
+        border = "rounded",
+      },
+      progress = {
+        border = "rounded",
+      },
+      keymaps_help = {
+        border = "rounded",
+      },
+    },
     dependencies = { "nvim-tree/nvim-web-devicons" },
     keys = {
       {
@@ -64,6 +106,13 @@ return {
           require("oil").open()
         end,
         desc = "Open Oil",
+      },
+      {
+        "<leader>O",
+        function()
+          require("oil").toggle_float()
+        end,
+        desc = "Toggle Oil Float",
       },
     },
   },
