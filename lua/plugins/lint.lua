@@ -1,0 +1,73 @@
+-- ─── nvim-lint — Asynchronous Linting Engine ─────────────────────
+return {
+  {
+    "mfussenegger/nvim-lint",
+    event = { "BufReadPost", "BufWritePost", "InsertLeave" },
+    opts = {
+      linters_by_ft = {
+        c = { "clang-tidy" },
+        cpp = { "clang-tidy" },
+        go = { "golangci-lint" },
+        python = { "ruff" },
+      },
+    },
+    config = function(_, opts)
+      local lint = require("lint")
+
+      -- Define aliases for common linter names with hyphens
+      lint.linters["clang-tidy"] = lint.linters.clangtidy
+      lint.linters["golangci-lint"] = lint.linters.golangcilint
+
+      lint.linters_by_ft = opts.linters_by_ft
+
+      local lint_augroup = vim.api.nvim_create_augroup("NvimLint", { clear = true })
+
+      local function run_lint()
+        local bufnr = vim.api.nvim_get_current_buf()
+        if not vim.api.nvim_buf_is_valid(bufnr) then
+          return
+        end
+        local ft = vim.bo[bufnr].filetype
+        if not ft or ft == "" then
+          return
+        end
+        local linters = lint.linters_by_ft[ft] or {}
+        if type(linters) ~= "table" or #linters == 0 then
+          return
+        end
+
+        local valid_linters = {}
+        for _, name in ipairs(linters) do
+          local linter = lint.linters[name]
+          if linter then
+            local cmd = type(linter) == "table" and linter.cmd or name
+            if type(cmd) == "function" then
+              cmd = cmd()
+            end
+            if type(cmd) == "string" and vim.fn.executable(cmd) == 1 then
+              table.insert(valid_linters, name)
+            end
+          end
+        end
+
+        if #valid_linters > 0 then
+          lint.try_lint(valid_linters)
+        end
+      end
+
+      vim.api.nvim_create_autocmd({ "BufWritePost", "BufReadPost", "InsertLeave" }, {
+        group = lint_augroup,
+        callback = run_lint,
+      })
+
+      -- User command and keymap for manual linting
+      vim.api.nvim_create_user_command("Lint", function()
+        run_lint()
+      end, { desc = "Trigger linting for current buffer" })
+
+      vim.keymap.set("n", "<leader>cl", function()
+        run_lint()
+      end, { desc = "Lint current buffer" })
+    end,
+  },
+}
