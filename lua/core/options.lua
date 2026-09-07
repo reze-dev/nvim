@@ -58,8 +58,9 @@ opt.splitbelow = true
 opt.swapfile = false
 opt.backup = false
 opt.undofile = true
-opt.undodir = vim.fn.stdpath("data") .. "/undo"
-vim.fn.mkdir(opt.undodir:get(), "p")
+local undo_dir = vim.fn.stdpath("data") .. "/undo"
+opt.undodir = undo_dir
+vim.fn.mkdir(undo_dir, "p")
 opt.updatetime = 200
 opt.timeoutlen = 300
 opt.completeopt = { "menu", "menuone", "noselect" }

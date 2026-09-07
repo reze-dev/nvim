@@ -49,13 +49,20 @@ return {
           local name = vim.fn.fnamemodify(path, ":t:r")
           names[#names + 1] = name
         end
+        -- Monoglow is a regular colorscheme, not a Base46 theme, but it can
+        -- still participate in this picker without changing Base46 itself.
+        names[#names + 1] = "monoglow"
         table.sort(names)
         return names
       end
 
       local function apply_theme(name)
-        base46.load(name)
-        vim.api.nvim_exec_autocmds("ColorScheme", {})
+        if name == "monoglow" then
+          vim.cmd.colorscheme("monoglow")
+        else
+          base46.load(name)
+          vim.api.nvim_exec_autocmds("ColorScheme", {})
+        end
       end
 
       package.preload["base46-themes"] = function()
