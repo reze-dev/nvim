@@ -1,0 +1,16 @@
+# Neovim-generated state
+*.swp
+*.swo
+*.un~
+.netrwhist
+
+# Local/editor metadata
+.DS_Store
+
+# Profiling and debug output
+*.log
+startup.log
+
+# Machine-local plugin/runtime data
+lazy-lock.local.json
+
