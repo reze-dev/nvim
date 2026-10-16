@@ -7,16 +7,16 @@ return {
       signs = {
         add = { text = "▎" },
         change = { text = "▎" },
-        delete = { text = "" },
-        topdelete = { text = "" },
+        delete = { text = "▁" },
+        topdelete = { text = "▁" },
         changedelete = { text = "▎" },
         untracked = { text = "▎" },
       },
       signs_staged = {
         add = { text = "▎" },
         change = { text = "▎" },
-        delete = { text = "" },
-        topdelete = { text = "" },
+        delete = { text = "▁" },
+        topdelete = { text = "▁" },
         changedelete = { text = "▎" },
       },
       current_line_blame = false,
@@ -48,7 +48,7 @@ return {
           if vim.wo.diff then
             vim.cmd.normal({ "]c", bang = true })
           else
-            gs.nav_hunk("next")
+            gs.nav_hunk("next", { target = "all" })
           end
         end, { desc = "Next git hunk" })
 
@@ -56,7 +56,7 @@ return {
           if vim.wo.diff then
             vim.cmd.normal({ "[c", bang = true })
           else
-            gs.nav_hunk("prev")
+            gs.nav_hunk("prev", { target = "all" })
           end
         end, { desc = "Previous git hunk" })
 

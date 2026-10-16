@@ -3,10 +3,13 @@ return {
   {
     "mfussenegger/nvim-lint",
     event = { "BufReadPost", "BufWritePost", "InsertLeave" },
+    keys = {
+      { "<leader>cl", "<cmd>Lint<cr>", desc = "Lint current buffer" },
+    },
     opts = {
+      -- NOTE: c/cpp intentionally omitted — clangd --clang-tidy (lsp.lua)
+      -- already reports them. Running nvim-lint clang-tidy too = duplicates.
       linters_by_ft = {
-        c = { "clang-tidy" },
-        cpp = { "clang-tidy" },
         go = { "golangci-lint" },
         python = { "ruff" },
         yaml = { "yamllint" },
@@ -20,9 +23,13 @@ return {
     config = function(_, opts)
       local lint = require("lint")
 
-      -- Define aliases for common linter names with hyphens
-      lint.linters["clang-tidy"] = lint.linters.clangtidy
-      lint.linters["golangci-lint"] = lint.linters.golangcilint
+      -- nvim-lint module names have no hyphens; our ft table uses hyphens.
+      if lint.linters.clangtidy then
+        lint.linters["clang-tidy"] = lint.linters.clangtidy
+      end
+      if lint.linters.golangcilint then
+        lint.linters["golangci-lint"] = lint.linters.golangcilint
+      end
 
       lint.linters_by_ft = opts.linters_by_ft
 
@@ -50,6 +57,10 @@ return {
             if type(cmd) == "function" then
               cmd = cmd()
             end
+            -- cmd can be a string or { cmd, args... } list
+            if type(cmd) == "table" then
+              cmd = cmd[1]
+            end
             if type(cmd) == "string" and vim.fn.executable(cmd) == 1 then
               table.insert(valid_linters, name)
             end
@@ -66,14 +77,10 @@ return {
         callback = run_lint,
       })
 
-      -- User command and keymap for manual linting
+      -- User command for manual linting (<leader>cl is declared in keys above)
       vim.api.nvim_create_user_command("Lint", function()
         run_lint()
       end, { desc = "Trigger linting for current buffer" })
-
-      vim.keymap.set("n", "<leader>cl", function()
-        run_lint()
-      end, { desc = "Lint current buffer" })
     end,
   },
 }

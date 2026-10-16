@@ -10,7 +10,7 @@ return {
   -- NOTE: On NixOS, Mason-installed binaries may fail due to glibc.
   --       If so, install LSPs via nix and remove from ensure_installed.
   {
-    "williamboman/mason.nvim",
+    "mason-org/mason.nvim",
     cmd = "Mason",
     build = ":MasonUpdate",
     opts = {
@@ -25,10 +25,10 @@ return {
     },
   },
   {
-    "williamboman/mason-lspconfig.nvim",
+    "mason-org/mason-lspconfig.nvim",
     event = { "BufReadPre", "BufNewFile" },
     dependencies = {
-      "williamboman/mason.nvim",
+      "mason-org/mason.nvim",
       "neovim/nvim-lspconfig",
     },
     opts = {
@@ -47,8 +47,10 @@ return {
         "taplo", -- TOML
         "zls", -- Zig
         -- NOTE: rust-analyzer is NOT here — handled by rustaceanvim
+        -- NOTE: clangd is NOT here on NixOS (use system clangd); add it
+        -- here on other distros if you want Mason to own it.
       },
-      automatic_installation = true,
+      automatic_enable = true,
     },
     config = function(_, opts)
       require("mason-lspconfig").setup(opts)
@@ -73,10 +75,10 @@ return {
         },
         signs = {
           text = {
-            [vim.diagnostic.severity.ERROR] = " ",
-            [vim.diagnostic.severity.WARN] = " ",
+            [vim.diagnostic.severity.ERROR] = " ",
+            [vim.diagnostic.severity.WARN] = " ",
             [vim.diagnostic.severity.HINT] = "󰌵 ",
-            [vim.diagnostic.severity.INFO] = " ",
+            [vim.diagnostic.severity.INFO] = " ",
           },
         },
       })
@@ -136,7 +138,7 @@ return {
           end, "List workspace folders")
 
           -- Inlay hints (Neovim 0.10+)
-          if client:supports_method("textDocument/inlayHint", bufnr) then
+          if client:supports_method("textDocument/inlayHint", { bufnr = bufnr }) then
             vim.lsp.inlay_hint.enable(true, { bufnr = bufnr })
             map("<leader>lh", function()
               vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled({ bufnr = bufnr }), { bufnr = bufnr })
@@ -144,12 +146,12 @@ return {
           end
 
           -- Codelens
-          if client:supports_method("textDocument/codeLens", bufnr) then
+          if client:supports_method("textDocument/codeLens", { bufnr = bufnr }) then
             map("<leader>ll", vim.lsp.codelens.run, "Run codelens")
             map("<leader>lL", vim.lsp.codelens.refresh, "Refresh codelens")
           end
 
-          if client:supports_method("textDocument/documentHighlight", bufnr) then
+          if client:supports_method("textDocument/documentHighlight", { bufnr = bufnr }) then
             local group = vim.api.nvim_create_augroup("LspDocumentHighlight", { clear = false })
             vim.api.nvim_clear_autocmds({ group = group, buffer = bufnr })
             vim.api.nvim_create_autocmd({ "CursorHold", "CursorHoldI" }, {
@@ -176,15 +178,13 @@ return {
       -- Shared defaults for every server (Neovim 0.12 wildcard config).
       vim.lsp.config("*", { capabilities = capabilities })
 
-      -- clangd negotiates UTF-16/UTF-8 offset encoding on top of the shared defaults.
-      vim.lsp.config("clangd", {
-        capabilities = { offsetEncoding = { "utf-16", "utf-8" } },
-      })
-
       -- ── Server configurations using vim.lsp.config (Neovim 0.12+) ──
 
-      -- Clangd (C/C++)
+      -- Clangd (C/C++): single table so blink caps + offsetEncoding merge.
       vim.lsp.config("clangd", {
+        capabilities = vim.tbl_deep_extend("force", capabilities, {
+          offsetEncoding = { "utf-16", "utf-8" },
+        }),
         cmd = {
           "clangd",
           "--background-index",
@@ -282,17 +282,9 @@ return {
         },
       })
 
-      -- TypeScript
-      vim.lsp.config("ts_ls", {
-      })
-
-      -- HTML
-      vim.lsp.config("html", {
-      })
-
-      -- CSS
-      vim.lsp.config("cssls", {
-      })
+      -- TypeScript (empty = use lspconfig defaults)
+      -- HTML (empty = use lspconfig defaults)
+      -- CSS (empty = use lspconfig defaults)
 
       -- JSON
       vim.lsp.config("jsonls", {
@@ -318,9 +310,7 @@ return {
         },
       })
 
-      -- TOML
-      vim.lsp.config("taplo", {
-      })
+      -- TOML (taplo: empty = use lspconfig defaults)
 
       -- Zig — zls
       vim.lsp.config("zls", {
@@ -328,11 +318,8 @@ return {
         root_markers = { "build.zig.zon", "build.zig", "zig-out", "compile_commands.json" },
       })
 
-      -- Dockerfile — docker-language-server, zero-config
-      vim.lsp.config("dockerls", {})
-
-      -- docker-compose files — docker-compose-language-service
-      vim.lsp.config("docker_compose_language_service", {})
+      -- Dockerfile — docker-language-server, zero-config (lspconfig defaults)
+      -- docker-compose files — docker-compose-language-service (lspconfig defaults)
 
       -- Terraform / Terraform vars — terraform-ls
       vim.lsp.config("terraformls", {

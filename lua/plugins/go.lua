@@ -4,11 +4,8 @@ return {
     "ray-x/go.nvim",
     dependencies = {
       "ray-x/guihua.lua",
-      "neovim/nvim-lspconfig",
-      "nvim-treesitter/nvim-treesitter",
     },
     ft = { "go", "gomod", "gowork", "gotmpl" },
-    build = ':lua require("go.install").update_all_sync()',
     config = function()
       require("go").setup({
         -- Disable LSP here — we configure gopls in lsp.lua
@@ -19,14 +16,9 @@ return {
         goimports = "gopls",
         -- Linting
         linter = "golangci-lint",
-        -- Testing
+        -- Testing (neotest-golang is the primary runner; GoTest is the fallback)
         test_runner = "go",
-        run_in_floaterm = true,
-        floaterm = {
-          position = "bottom",
-          width = 0.98,
-          height = 0.35,
-        },
+        run_in_floaterm = false,
         -- DAP — owned by dap.lua (delve adapter + configurations).
         dap_debug = false,
         -- Tags
@@ -39,7 +31,9 @@ return {
       })
 
       -- Go-specific keymaps
+      local go_keys = vim.api.nvim_create_augroup("GoKeymaps", { clear = true })
       vim.api.nvim_create_autocmd("FileType", {
+        group = go_keys,
         pattern = { "go" },
         callback = function(event)
           local map = function(keys, func, desc)

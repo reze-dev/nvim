@@ -50,6 +50,9 @@ require("lazy").setup({
     lazy = false,
     version = false,
   },
+  install = {
+    colorscheme = { "base46-rosepin", "habamax" },
+  },
   checker = {
     enabled = true,
     notify = false,

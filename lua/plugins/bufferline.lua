@@ -17,8 +17,8 @@ return {
       mode = "buffers",
       themable = true,
       numbers = "none",
-      close_command = "bdelete! %d",
-      right_mouse_command = "bdelete! %d",
+      close_command = "bdelete %d",
+      right_mouse_command = "bdelete %d",
       left_mouse_command = "buffer %d",
       middle_mouse_command = nil,
       indicator = {
@@ -63,7 +63,7 @@ return {
       persist_buffer_sort = true,
       separator_style = "thin",
       enforce_regular_tabs = false,
-      always_show_bufferline = true,
+      always_show_bufferline = false,
       hover = {
         enabled = true,
         delay = 200,

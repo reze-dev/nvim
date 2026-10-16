@@ -4,10 +4,11 @@ return {
     "nvim-neotest/neotest",
     dependencies = {
       "nvim-lua/plenary.nvim",
+      "nvim-neotest/nvim-nio",
       "nvim-treesitter/nvim-treesitter",
-      { "mrcjkb/rustaceanvim",                 optional = true },
-      { "fredrikaverpil/neotest-golang",       optional = false },
-      { "alfaix/neotest-gtest",                optional = false },
+      { "mrcjkb/rustaceanvim", version = "^5" },
+      { "fredrikaverpil/neotest-golang" },
+      { "alfaix/neotest-gtest" },
     },
     cmd = { "Neotest" },
     keys = {

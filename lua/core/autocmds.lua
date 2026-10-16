@@ -24,8 +24,14 @@ autocmd("VimResized", {
 autocmd("BufReadPost", {
   group = augroup("LastPosition", { clear = true }),
   callback = function(event)
-    local exclude = { "gitcommit" }
+    local exclude = { "gitcommit", "gitrebase", "hgcommit" }
     local buf = event.buf
+    if not vim.api.nvim_buf_is_valid(buf) then
+      return
+    end
+    if vim.bo[buf].buftype ~= "" then
+      return
+    end
     if vim.tbl_contains(exclude, vim.bo[buf].filetype) or vim.b[buf].last_loc then
       return
     end
@@ -34,6 +40,7 @@ autocmd("BufReadPost", {
     local lcount = vim.api.nvim_buf_line_count(buf)
     if mark[1] > 0 and mark[1] <= lcount then
       pcall(vim.api.nvim_win_set_cursor, 0, mark)
+      pcall(vim.cmd, "normal! zv")
     end
   end,
 })
@@ -46,20 +53,26 @@ autocmd("FileType", {
     "checkhealth",
     "dbout",
     "gitsigns.blame",
+    "grug-far",
     "help",
     "lspinfo",
+    "man",
     "neotest-output",
     "neotest-output-panel",
     "neotest-summary",
     "notify",
+    "oil",
     "qf",
+    "snacks_win",
     "spectre_panel",
     "startuptime",
     "tsplayground",
   },
   callback = function(event)
     vim.bo[event.buf].buflisted = false
-    vim.keymap.set("n", "q", "<cmd>close<cr>", { buffer = event.buf, silent = true })
+    vim.keymap.set("n", "q", function()
+      pcall(vim.cmd, "close")
+    end, { buffer = event.buf, silent = true, nowait = true, desc = "Close window" })
   end,
 })
 
@@ -71,20 +84,36 @@ autocmd("BufWritePre", {
       return
     end
     local file = vim.uv.fs_realpath(event.match) or event.match
-    vim.fn.mkdir(vim.fn.fnamemodify(file, ":p:h"), "p")
+    local dir = vim.fn.fnamemodify(file, ":p:h")
+    if not vim.uv.fs_stat(dir) then
+      vim.fn.mkdir(dir, "p")
+    end
   end,
 })
 
--- Remove trailing whitespace on save
+-- Remove trailing whitespace on save (opt-out via :TrimToggle, skips markdown)
+vim.g.trim_whitespace = vim.g.trim_whitespace == nil and true or vim.g.trim_whitespace
+vim.api.nvim_create_user_command("TrimToggle", function()
+  vim.g.trim_whitespace = not vim.g.trim_whitespace
+  vim.notify("Trim whitespace on save " .. (vim.g.trim_whitespace and "enabled" or "disabled"), vim.log.levels.INFO)
+end, { desc = "Toggle trailing-whitespace trimming on save" })
+
 autocmd("BufWritePre", {
   group = augroup("TrimWhitespace", { clear = true }),
   pattern = "*",
-  callback = function()
-    local save_cursor = vim.fn.getpos(".")
+  callback = function(event)
+    if not vim.g.trim_whitespace then
+      return
+    end
+    local ft = vim.bo[event.buf].filetype
+    if ft == "markdown" or ft == "gitcommit" or ft == "diff" or ft == "patch" then
+      return
+    end
+    local view = vim.fn.winsaveview()
     pcall(function()
-      vim.cmd([[%s/\s\+$//e]])
+      vim.cmd([[keeppatterns %s/\s\+$//e]])
     end)
-    vim.fn.setpos(".", save_cursor)
+    vim.fn.winrestview(view)
   end,
 })
 
@@ -92,7 +121,7 @@ autocmd("BufWritePre", {
 autocmd({ "FocusGained", "TermClose", "TermLeave" }, {
   group = augroup("Checktime", { clear = true }),
   callback = function()
-    if vim.o.buftype ~= "nofile" then
+    if vim.bo.buftype ~= "nofile" then
       vim.cmd("checktime")
     end
   end,
@@ -113,9 +142,44 @@ autocmd("FileType", {
 -- service targets `yaml.docker-compose`, so route those files explicitly.
 vim.filetype.add({
   pattern = {
-    ["docker%-compose*%.ya?ml"] = "yaml.docker-compose",
-    ["compose%.ya?ml"] = "yaml.docker-compose",
+    ["docker%-compose.*%.ya?ml"] = "yaml.docker-compose",
+    ["compose.*%.ya?ml"] = "yaml.docker-compose",
   },
+})
+
+-- Don't auto-continue comments with o/O or Enter
+autocmd("FileType", {
+  group = augroup("NoAutoComment", { clear = true }),
+  pattern = { "*" },
+  callback = function()
+    vim.opt_local.formatoptions:remove({ "c", "r", "o" })
+  end,
+})
+
+-- Terminal: no line numbers, enter insert mode
+autocmd("TermOpen", {
+  group = augroup("TermSettings", { clear = true }),
+  callback = function()
+    vim.opt_local.number = false
+    vim.opt_local.relativenumber = false
+    vim.opt_local.signcolumn = "no"
+    vim.cmd("startinsert")
+  end,
+})
+
+-- Big files: disable treesitter fold + heavy adornments for perf
+autocmd("BufReadPre", {
+  group = augroup("BigFile", { clear = true }),
+  callback = function(event)
+    local ok, stat = pcall(vim.uv.fs_stat, event.match)
+    if ok and stat and stat.size and stat.size > 1024 * 1024 then
+      vim.b[event.buf].bigfile = true
+      vim.opt_local.foldmethod = "manual"
+      vim.opt_local.foldexpr = "0"
+      vim.opt_local.spell = false
+      vim.b[event.buf].illuminate_disabled = true
+    end
+  end,
 })
 
 -- Fix conceallevel for json files

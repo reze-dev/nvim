@@ -41,7 +41,7 @@ return {
           map("<leader>rj", "<cmd>RustLsp moveItem down<cr>", "Move item down")
           map("<leader>ra", "<cmd>RustLsp codeAction<cr>", "Code action (rust)")
           map("<leader>rh", "<cmd>RustLsp hover actions<cr>", "Hover actions")
-          map("J", "<cmd>RustLsp joinLines<cr>", "Join lines (Rust)")
+          map("<leader>rJ", "<cmd>RustLsp joinLines<cr>", "Join lines (Rust)")
 
           -- Debugging
           map("<leader>rD", "<cmd>RustLsp debuggables<cr>", "Debuggables")
@@ -53,8 +53,8 @@ return {
               loadOutDirsFromCheck = true,
               buildScripts = { enable = true },
             },
-            checkOnSave = true,
             check = {
+              enable = true,
               command = "clippy",
               extraArgs = { "--no-deps" },
             },
@@ -92,13 +92,16 @@ return {
           -- Try mason path first, then system
           local mason_path = vim.fn.stdpath("data") .. "/mason/packages/codelldb"
           local codelldb_path = mason_path .. "/extension/adapter/codelldb"
-          local liblldb_path = mason_path .. "/extension/lldb/lib/liblldb.so"
+          local ext = mason_path .. "/extension/lldb/lib/liblldb"
+          local lib_ext = vim.uv.os_uname().sysname == "Darwin" and ".dylib" or ".so"
+          local liblldb_path = ext .. lib_ext
 
           if vim.fn.filereadable(codelldb_path) == 1 then
-            return cfg.get_codelldb_adapter(codelldb_path, liblldb_path)
+            local lib = vim.fn.filereadable(liblldb_path) == 1 and liblldb_path or nil
+            return cfg.get_codelldb_adapter(codelldb_path, lib)
           else
             -- Fall back to system codelldb
-            return cfg.get_codelldb_adapter("codelldb", "")
+            return cfg.get_codelldb_adapter("codelldb", nil)
           end
         end,
       },

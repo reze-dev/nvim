@@ -25,7 +25,7 @@ return {
       go = { "goimports", "gofumpt" },
       zig = { "zigfmt" },
       lua = { "stylua" },
-      python = { "ruff_format", "ruff_organize_imports" },
+      python = { "ruff_organize_imports", "ruff_format" },
       toml = { "taplo" },
       javascript = { "prettier" },
       typescript = { "prettier" },
@@ -54,8 +54,14 @@ return {
       if vim.b[bufnr].disable_autoformat or vim.g.disable_autoformat then
         return
       end
+      -- Never auto-format commit messages; markdown hard-breaks are handled
+      -- by prettier only on manual <leader>cf.
+      local ft = vim.bo[bufnr].filetype
+      if ft == "gitcommit" or ft == "gitrebase" then
+        return
+      end
       return {
-        timeout_ms = 500,
+        timeout_ms = 1000,
         lsp_format = "fallback",
       }
     end,

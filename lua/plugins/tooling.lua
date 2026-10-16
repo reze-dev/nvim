@@ -2,7 +2,7 @@
 return {
   {
     "WhoIsSethDaniel/mason-tool-installer.nvim",
-    dependencies = { "williamboman/mason.nvim" },
+    dependencies = { "mason-org/mason.nvim" },
     event = "VeryLazy",
     cmd = { "MasonToolsInstall", "MasonToolsUpdate", "MasonToolsInstallSync", "MasonToolsUpdateSync", "MasonToolsClean" },
     -- Set NVIM_SKIP_MASON_INSTALL=1 (e.g. in CI or headless verification) to
@@ -22,6 +22,8 @@ return {
         "yamllint", "hadolint", "tflint", "terraform", "terraform-ls",
         -- Debug adapters for Go and Rust/C/C++.
         "delve", "codelldb", "debugpy",
+        -- TUI git client used by snacks.lazygit (<leader>gg/gl).
+        "lazygit",
       },
       auto_update = false,
       run_on_start = true,

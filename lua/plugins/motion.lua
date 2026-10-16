@@ -1,10 +1,9 @@
 -- ─── Motion Training & Navigation Tools ───────────────────────────
 return {
-  -- Hardtime — train better vim movement habits
+  -- Hardtime — train better vim movement habits (opt-in via <leader>uh / :Hardtime)
   {
     "m4xshen/hardtime.nvim",
     dependencies = { "MunifTanjim/nui.nvim", "nvim-lua/plenary.nvim" },
-    event = "VeryLazy",
     cmd = { "Hardtime" },
     keys = {
       {
@@ -16,6 +15,7 @@ return {
       },
     },
     opts = {
+      enabled = false,
       max_count = 3,
       disabled_filetypes = {
         "qf",
@@ -25,26 +25,24 @@ return {
         "mason",
         "oil",
         "snacks_dashboard",
+        "snacks_picker_input",
+        "snacks_picker_list",
         "dashboard",
         "trouble",
         "harpoon",
         "help",
         "undotree",
-        "dapui_scopes",
-        "dapui_breakpoints",
-        "dapui_stacks",
-        "dapui_watches",
+        "dap-view",
+        "dap-view-term",
         "dap-repl",
-        "dapui_console",
       },
       disabled_buftypes = { "nofile", "prompt", "quickfix", "terminal" },
     },
   },
 
-  -- Precognition — visualize motion destinations
+  -- Precognition — visualize motion destinations (opt-in via <leader>up)
   {
     "tris203/precognition.nvim",
-    event = "VeryLazy",
     cmd = { "Precognition" },
     keys = {
       {
@@ -61,15 +59,14 @@ return {
     },
   },
 
-  -- Flash — blazing fast jump motions
+  -- Flash — blazing fast jump motions (key-lazy only, no VeryLazy)
   {
     "folke/flash.nvim",
-    event = "VeryLazy",
     opts = {},
     keys = {
       {
         "s",
-        -- NOTE: not in normal mode — nvim-surround needs `s` there (ys, cs, ds).
+        -- NOTE: not in normal mode — mini.surround needs `s` prefix there (ys, cs, ds).
         mode = { "x", "o" },
         function()
           require("flash").jump()
@@ -78,7 +75,7 @@ return {
       },
       {
         "S",
-        mode = { "n", "x", "o" },
+        mode = { "x", "o" },
         function()
           require("flash").treesitter()
         end,

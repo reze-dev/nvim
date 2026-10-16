@@ -1,68 +1,29 @@
--- ─── DAP — Debug Adapter Protocol ─────────────────────────────
+-- ─── DAP — Debug Adapter Protocol (nvim-dap-view UI) ─────────
 return {
   -- Core DAP
   {
     "mfussenegger/nvim-dap",
     dependencies = {
-      -- DAP UI
+      -- Modern debugger UI (replaces archived rcarriga/nvim-dap-ui)
       {
-        "rcarriga/nvim-dap-ui",
-        dependencies = { "nvim-neotest/nvim-nio" },
+        "igorlfs/nvim-dap-view",
         keys = {
-          { "<leader>du", function() require("dapui").toggle({}) end, desc = "DAP: toggle UI" },
-          { "<leader>de", function() require("dapui").eval() end, desc = "DAP: eval", mode = { "n", "v" } },
+          { "<leader>du", "<cmd>DapViewToggle<cr>", desc = "DAP: toggle UI" },
+          {
+            "<leader>de",
+            function()
+              require("dap-view").add_expr()
+            end,
+            desc = "DAP: eval",
+            mode = { "n", "v" },
+          },
         },
+        cmd = { "DapViewToggle", "DapViewWatch", "DapViewJump" },
         opts = {
-          icons = { expanded = "▾", collapsed = "▸", current_frame = "▸" },
-          layouts = {
-            {
-              elements = {
-                { id = "scopes", size = 0.35 },
-                { id = "breakpoints", size = 0.15 },
-                { id = "stacks", size = 0.25 },
-                { id = "watches", size = 0.25 },
-              },
-              size = 40,
-              position = "left",
-            },
-            {
-              elements = {
-                { id = "repl", size = 0.5 },
-                { id = "console", size = 0.5 },
-              },
-              size = 0.25,
-              position = "bottom",
-            },
-          },
-          floating = {
-            border = "rounded",
-            mappings = {
-              close = { "q", "<Esc>" },
-            },
-          },
+          winbar = { show = true },
+          windows = { height = 12 },
+          auto_toggle = true,
         },
-        config = function(_, opts)
-          local dap = require("dap")
-          local dapui = require("dapui")
-          dapui.setup(opts)
-
-          -- Auto open/close dapui with pcall for non-blocking stability
-          dap.listeners.after.event_initialized["dapui_config"] = function()
-            pcall(function()
-              dapui.open({})
-            end)
-          end
-          dap.listeners.before.event_terminated["dapui_config"] = function()
-            pcall(function()
-              dapui.close({})
-            end)
-          end
-          dap.listeners.before.event_exited["dapui_config"] = function()
-            pcall(function()
-              dapui.close({})
-            end)
-          end
-        end,
       },
       -- Virtual text
       {
@@ -104,22 +65,8 @@ return {
           )
         end,
       },
-      -- Mason DAP
-      -- NOTE: ALL adapter packages (delve, codelldb, debugpy) are installed by
-      --       mason-tool-installer (tooling.lua). This spec only registers
-      --       adapters for packages already present — setting ensure_installed
-      --       here would double-schedule installs and hit mason.nvim's
-      --       "Package is already installing" assert.
-      {
-        "jay-babu/mason-nvim-dap.nvim",
-        dependencies = { "williamboman/mason.nvim" },
-        cmd = { "DapInstall", "DapUninstall" },
-        opts = {
-          automatic_installation = false,
-          ensure_installed = {},
-          handlers = {},
-        },
-      },
+      -- NOTE: no mason-nvim-dap spec — delve/codelldb/debugpy are owned by
+      -- mason-tool-installer (tooling.lua). An empty handlers spec would be dead.
     },
     keys = {
       { "<leader>db", function() require("dap").toggle_breakpoint() end, desc = "DAP: toggle breakpoint" },
@@ -139,10 +86,10 @@ return {
       local dap = require("dap")
 
       -- ── Custom signs ──
-      vim.fn.sign_define("DapBreakpoint", { text = "\u{F057} ", texthl = "DiagnosticError", linehl = "", numhl = "" })
-      vim.fn.sign_define("DapBreakpointCondition", { text = "\u{F071} ", texthl = "DiagnosticWarn", linehl = "", numhl = "" })
-      vim.fn.sign_define("DapBreakpointRejected", { text = "\u{EB56} ", texthl = "DiagnosticError", linehl = "", numhl = "" })
-      vim.fn.sign_define("DapLogPoint", { text = "\u{25C6} ", texthl = "DiagnosticInfo", linehl = "", numhl = "" })
+      vim.fn.sign_define("DapBreakpoint", { text = " ", texthl = "DiagnosticError", linehl = "", numhl = "" })
+      vim.fn.sign_define("DapBreakpointCondition", { text = " ", texthl = "DiagnosticWarn", linehl = "", numhl = "" })
+      vim.fn.sign_define("DapBreakpointRejected", { text = " ", texthl = "DiagnosticError", linehl = "", numhl = "" })
+      vim.fn.sign_define("DapLogPoint", { text = "◆ ", texthl = "DiagnosticInfo", linehl = "", numhl = "" })
       vim.fn.sign_define("DapStopped", { text = "▶ ", texthl = "DiagnosticOk", linehl = "DapStoppedLine", numhl = "" })
 
       -- Highlight for the stopped line
@@ -167,7 +114,8 @@ return {
           args = { "--port", "${port}" },
         },
       }
-      dap.adapters.lldb = dap.adapters.codelldb
+      -- Clone (don't share the table — dap mutates per launch)
+      dap.adapters.lldb = vim.tbl_extend("force", {}, dap.adapters.codelldb)
 
       -- ── Executable Discovery & Selection Helper ──
       local function get_binary()
@@ -226,6 +174,11 @@ return {
           end
         end
 
+        -- Single candidate: return immediately, no picker, no prompt.
+        if #candidates == 1 then
+          return candidates[1]
+        end
+
         local co = coroutine.running()
         if co and #candidates > 0 then
           local items = {}
@@ -253,8 +206,6 @@ return {
             end
           end)
           return coroutine.yield()
-        elseif #candidates == 1 and not co then
-          return candidates[1]
         else
           local input = vim.fn.input("Path to executable: ", cwd .. "/", "file")
           if input == "" then
@@ -265,56 +216,59 @@ return {
       end
 
       -- ── C / C++ / Rust Launch Configurations ──
-      local codelldb_configurations = {
-        {
-          name = "Launch Binary (Smart Picker)",
-          type = "codelldb",
-          request = "launch",
-          program = get_binary,
-          cwd = "${workspaceFolder}",
-          stopOnEntry = false,
-          args = {},
-        },
-        {
-          name = "Launch Binary with Arguments",
-          type = "codelldb",
-          request = "launch",
-          program = get_binary,
-          cwd = "${workspaceFolder}",
-          stopOnEntry = false,
-          args = function()
-            local args_str = vim.fn.input("Arguments: ")
-            if args_str == "" then
-              return {}
-            end
-            return vim.split(args_str, "%s+", { trimempty = true })
-          end,
-        },
-        {
-          name = "Attach to Process",
-          type = "codelldb",
-          request = "attach",
-          pid = function()
-            return require("dap.utils").pick_process()
-          end,
-          cwd = "${workspaceFolder}",
-        },
-        {
-          name = "Load Core Dump",
-          type = "codelldb",
-          request = "attach",
-          program = get_binary,
-          coreDumpPath = function()
-            local core_path = vim.fn.input("Path to core dump: ", vim.fn.getcwd() .. "/", "file")
-            return core_path ~= "" and core_path or nil
-          end,
-          cwd = "${workspaceFolder}",
-        },
-      }
+      local function codelldb_configs()
+        return {
+          {
+            name = "Launch Binary (Smart Picker)",
+            type = "codelldb",
+            request = "launch",
+            program = get_binary,
+            cwd = "${workspaceFolder}",
+            stopOnEntry = false,
+            args = {},
+          },
+          {
+            name = "Launch Binary with Arguments",
+            type = "codelldb",
+            request = "launch",
+            program = get_binary,
+            cwd = "${workspaceFolder}",
+            stopOnEntry = false,
+            args = function()
+              local args_str = vim.fn.input("Arguments: ")
+              if args_str == "" then
+                return {}
+              end
+              return vim.split(args_str, "%s+", { trimempty = true })
+            end,
+          },
+          {
+            name = "Attach to Process",
+            type = "codelldb",
+            request = "attach",
+            pid = function()
+              return require("dap.utils").pick_process()
+            end,
+            cwd = "${workspaceFolder}",
+          },
+          {
+            name = "Load Core Dump",
+            type = "codelldb",
+            request = "attach",
+            program = get_binary,
+            coreDumpPath = function()
+              local core_path = vim.fn.input("Path to core dump: ", vim.fn.getcwd() .. "/", "file")
+              return core_path ~= "" and core_path or nil
+            end,
+            cwd = "${workspaceFolder}",
+          },
+        }
+      end
 
-      dap.configurations.cpp = codelldb_configurations
-      dap.configurations.c = codelldb_configurations
-      dap.configurations.rust = codelldb_configurations
+      -- Deep-copied per filetype so per-launch mutations don't leak across ft
+      dap.configurations.cpp = codelldb_configs()
+      dap.configurations.c = codelldb_configs()
+      dap.configurations.rust = codelldb_configs()
 
       -- ── Delve (Go) Adapter & Configurations ──
       local dlv_path = "dlv"

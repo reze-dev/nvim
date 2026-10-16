@@ -56,9 +56,21 @@ return {
           "mason",
           "notify",
           "oil",
+          "harpoon",
           "toggleterm",
         },
       },
+    },
+  },
+
+  -- Notify — solid background so nvim-notify never warns about
+  -- 'NotifyBackground has no background highlight' (we use transparency=true,
+  -- so Normal itself has no bg to inherit).
+  {
+    "rcarriga/nvim-notify",
+    lazy = true,
+    opts = {
+      background_colour = "#1e1e2e",
     },
   },
 
@@ -137,7 +149,11 @@ return {
         "snacks_dashboard",
         "lazy",
         "mason",
+        "snacks_picker_input",
+        "snacks_picker_list",
         "TelescopePrompt",
+        "dap-view",
+        "dap-view-term",
       },
     },
     config = function(_, opts)
@@ -150,7 +166,7 @@ return {
     "NvChad/nvim-colorizer.lua",
     event = { "BufReadPost", "BufNewFile" },
     opts = {
-      filetypes = { "*" },
+      filetypes = { "*", "!lazy", "!mason", "!snacks_dashboard", "!dashboard" },
       user_default_options = {
         RGB = true,
         RRGGBB = true,

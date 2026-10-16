@@ -2,6 +2,8 @@
 return {
   "stevearc/oil.nvim",
   dependencies = { "nvim-tree/nvim-web-devicons" },
+  -- Must load at startup to hijack `nvim .` / `nvim <dir>` (netrw replacement)
+  lazy = false,
   keys = {
     { "<leader>e", "<cmd>Oil<cr>", desc = "Open file explorer (Oil)" },
     { "-", "<cmd>Oil<cr>", desc = "Open parent directory" },

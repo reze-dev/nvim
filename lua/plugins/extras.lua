@@ -11,7 +11,7 @@ return {
         javascript = { "string", "template_string" },
         java = false,
       },
-      disable_filetype = { "TelescopePrompt", "spectre_panel" },
+      disable_filetype = { "snacks_picker_input", "TelescopePrompt", "spectre_panel" },
       fast_wrap = {
         map = "<M-e>",
         chars = { "{", "[", "(", '"', "'" },
@@ -28,15 +28,26 @@ return {
     },
   },
 
-  -- Surround — ys, ds, cs motions
+  -- Surround — ys/ds/cs motions (mini.surround, treesitter-aware)
   {
-    "kylechui/nvim-surround",
+    "echasnovski/mini.surround",
     version = "*",
     event = "VeryLazy",
-    opts = {},
+    opts = {
+      mappings = {
+        add = "ys",
+        delete = "ds",
+        replace = "cs",
+        find = "sf",
+        find_left = "sF",
+        highlight = "sh",
+        suffix_last = "l",
+        suffix_next = "n",
+      },
+    },
   },
 
-  -- Trouble — pretty diagnostics list
+  -- Trouble — pretty diagnostics list (v3 API)
   {
     "folke/trouble.nvim",
     cmd = { "Trouble" },
@@ -48,9 +59,7 @@ return {
       { "<leader>xL", "<cmd>Trouble loclist toggle<cr>", desc = "Location list (Trouble)" },
       { "<leader>xQ", "<cmd>Trouble qflist toggle<cr>", desc = "Quickfix list (Trouble)" },
     },
-    opts = {
-      use_diagnostic_signs = true,
-    },
+    opts = {},
   },
 
   -- Mini.ai — enhanced text objects
@@ -58,6 +67,7 @@ return {
     "echasnovski/mini.ai",
     version = "*",
     event = "VeryLazy",
+    dependencies = { "nvim-treesitter/nvim-treesitter" },
     config = function()
       local ai = require("mini.ai")
       ai.setup({
