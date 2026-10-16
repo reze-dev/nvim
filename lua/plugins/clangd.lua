@@ -5,20 +5,6 @@ return {
     lazy = true,
     ft = { "c", "cpp", "objc", "objcpp", "cuda" },
     opts = {
-      inlay_hints = {
-        inline = false,
-        only_current_line = false,
-        only_current_line_autocmd = { "CursorHold" },
-        show_parameter_hints = true,
-        parameter_hints_prefix = "<- ",
-        other_hints_prefix = "=> ",
-        max_len_align = false,
-        max_len_align_padding = 1,
-        right_align = false,
-        right_align_padding = 7,
-        highlight = "Comment",
-        priority = 100,
-      },
       ast = {
         role_icons = {
           type = "🄣",
@@ -45,9 +31,6 @@ return {
         border = "rounded",
       },
       symbol_info = {
-        border = "rounded",
-      },
-      type_hierarchy = {
         border = "rounded",
       },
     },

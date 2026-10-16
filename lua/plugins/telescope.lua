@@ -12,7 +12,6 @@ return {
           return vim.fn.executable("make") == 1
         end,
       },
-      "nvim-telescope/telescope-ui-select.nvim",
     },
     cmd = "Telescope",
     keys = {
@@ -42,8 +41,8 @@ return {
 
       telescope.setup({
         defaults = {
-          prompt_prefix = "   ",
-          selection_caret = "  ",
+          prompt_prefix = "\u{F002} ",
+          selection_caret = "\u{25B8} ",
           entry_prefix = "  ",
           initial_mode = "insert",
           selection_strategy = "reset",
@@ -126,15 +125,11 @@ return {
             override_file_sorter = true,
             case_mode = "smart_case",
           },
-          ["ui-select"] = {
-            require("telescope.themes").get_dropdown(),
-          },
         },
       })
 
       -- Load extensions
       pcall(telescope.load_extension, "fzf")
-      pcall(telescope.load_extension, "ui-select")
     end,
   },
 }

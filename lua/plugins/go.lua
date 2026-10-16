@@ -27,16 +27,15 @@ return {
           width = 0.98,
           height = 0.35,
         },
-        -- DAP
-        dap_debug = true,
-        dap_debug_gui = true,
+        -- DAP — owned by dap.lua (delve adapter + configurations).
+        dap_debug = false,
         -- Tags
         tag_transform = "snakecase",
         tag_options = "json=omitempty",
         -- Misc
         verbose = false,
         log_path = vim.fn.stdpath("cache") .. "/gonvim.log",
-        icons = { breakpoint = "🔴", currentpos = "🏃" },
+        icons = { breakpoint = "\u{F057} ", currentpos = "▶ " },
       })
 
       -- Go-specific keymaps
@@ -54,8 +53,8 @@ return {
           map("<leader>Gr", "<cmd>GoRmTag<cr>", "Remove struct tags")
           map("<leader>Gi", "<cmd>GoImpl<cr>", "Implement interface")
           map("<leader>Ge", "<cmd>GoIfErr<cr>", "Generate if err")
-          map("<leader>Gd", "<cmd>GoDebug<cr>", "Start debugger")
-          map("<leader>GD", "<cmd>GoDebug -s<cr>", "Stop debugger")
+          map("<leader>Gd", function() require("dap").continue() end, "Start debugger")
+          map("<leader>GD", function() require("dap").terminate() end, "Stop debugger")
           map("<leader>Gl", "<cmd>GoLint<cr>", "Lint")
           map("<leader>Gv", "<cmd>GoVet<cr>", "Vet")
           map("<leader>Gg", "<cmd>GoGenerate<cr>", "Go generate")

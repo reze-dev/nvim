@@ -9,15 +9,8 @@ return {
     { "<leader>bx", "<cmd>BufferLineCloseOthers<cr>", desc = "Close other buffers" },
     { "<leader>br", "<cmd>BufferLineCloseRight<cr>", desc = "Close buffers to the right" },
     { "<leader>bl", "<cmd>BufferLineCloseLeft<cr>", desc = "Close buffers to the left" },
-    { "<S-h>", "<cmd>BufferLineCyclePrev<cr>", desc = "Previous buffer" },
-    { "<S-l>", "<cmd>BufferLineCycleNext<cr>", desc = "Next buffer" },
     { "[b", "<cmd>BufferLineCyclePrev<cr>", desc = "Previous buffer" },
     { "]b", "<cmd>BufferLineCycleNext<cr>", desc = "Next buffer" },
-    { "<leader>1", false }, -- Reserve for harpoon
-    { "<leader>2", false },
-    { "<leader>3", false },
-    { "<leader>4", false },
-    { "<leader>5", false },
   },
   opts = {
     options = {
@@ -44,8 +37,13 @@ return {
       diagnostics = "nvim_lsp",
       diagnostics_update_in_insert = false,
       diagnostics_indicator = function(count, level)
-        local icon = level:match("error") and " " or " "
-        return " " .. icon .. count
+        local icons = {
+          error = "\u{F057}",
+          warning = "\u{F071}",
+          info = "\u{F06A}",
+          hint = "\u{F0335}",
+        }
+        return (icons[level] or icons.info) .. count
       end,
       offsets = {
         {

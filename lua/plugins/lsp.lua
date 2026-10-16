@@ -42,6 +42,7 @@ return {
         "jsonls",
         "yamlls",
         "taplo", -- TOML
+        "zls", -- Zig
         -- NOTE: rust-analyzer is NOT here — handled by rustaceanvim
       },
       automatic_installation = true,
@@ -103,12 +104,10 @@ return {
 
           -- Info
           map("K", vim.lsp.buf.hover, "Hover documentation")
-          map("<C-S-k>", vim.lsp.buf.signature_help, "Signature help")
-          map("<C-S-k>", vim.lsp.buf.signature_help, "Signature help", "i")
+          map("<C-S-k>", vim.lsp.buf.signature_help, "Signature help", { "n", "i" })
 
           -- Actions
-          map("<leader>ca", vim.lsp.buf.code_action, "Code action")
-          map("<leader>ca", vim.lsp.buf.code_action, "Code action", "v")
+          map("<leader>ca", vim.lsp.buf.code_action, "Code action", { "n", "v" })
           map("<leader>rn", vim.lsp.buf.rename, "Rename symbol")
 
           -- Diagnostics
@@ -171,15 +170,18 @@ return {
         capabilities = blink.get_lsp_capabilities(capabilities)
       end
 
-      -- Clangd capabilities with UTF-16/UTF-8 offset encoding
-      local clangd_capabilities = vim.deepcopy(capabilities)
-      clangd_capabilities.offsetEncoding = { "utf-16", "utf-8" }
+      -- Shared defaults for every server (Neovim 0.12 wildcard config).
+      vim.lsp.config("*", { capabilities = capabilities })
+
+      -- clangd negotiates UTF-16/UTF-8 offset encoding on top of the shared defaults.
+      vim.lsp.config("clangd", {
+        capabilities = { offsetEncoding = { "utf-16", "utf-8" } },
+      })
 
       -- ── Server configurations using vim.lsp.config (Neovim 0.12+) ──
 
       -- Clangd (C/C++)
       vim.lsp.config("clangd", {
-        capabilities = clangd_capabilities,
         cmd = {
           "clangd",
           "--background-index",
@@ -199,7 +201,6 @@ return {
 
       -- Lua
       vim.lsp.config("lua_ls", {
-        capabilities = capabilities,
         settings = {
           Lua = {
             runtime = { version = "LuaJIT" },
@@ -224,7 +225,6 @@ return {
 
       -- Python — basedpyright
       vim.lsp.config("basedpyright", {
-        capabilities = capabilities,
         settings = {
           basedpyright = {
             analysis = {
@@ -241,7 +241,6 @@ return {
 
       -- Go — gopls
       vim.lsp.config("gopls", {
-        capabilities = capabilities,
         settings = {
           gopls = {
             gofumpt = true,
@@ -282,22 +281,18 @@ return {
 
       -- TypeScript
       vim.lsp.config("ts_ls", {
-        capabilities = capabilities,
       })
 
       -- HTML
       vim.lsp.config("html", {
-        capabilities = capabilities,
       })
 
       -- CSS
       vim.lsp.config("cssls", {
-        capabilities = capabilities,
       })
 
       -- JSON
       vim.lsp.config("jsonls", {
-        capabilities = capabilities,
         settings = {
           json = {
             validate = { enable = true },
@@ -307,7 +302,6 @@ return {
 
       -- YAML
       vim.lsp.config("yamlls", {
-        capabilities = capabilities,
         settings = {
           yaml = {
             schemaStore = {
@@ -323,7 +317,12 @@ return {
 
       -- TOML
       vim.lsp.config("taplo", {
-        capabilities = capabilities,
+      })
+
+      -- Zig — zls
+      vim.lsp.config("zls", {
+        filetypes = { "zig", "zir" },
+        root_markers = { "build.zig.zon", "build.zig", "zig-out", "compile_commands.json" },
       })
 
       -- Enable all servers
@@ -338,6 +337,7 @@ return {
         "jsonls",
         "yamlls",
         "taplo",
+        "zls",
       })
     end,
   },

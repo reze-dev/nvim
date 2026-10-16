@@ -5,7 +5,6 @@ return {
   "mrcjkb/rustaceanvim",
   version = "^5",
   ft = { "rust" },
-  lazy = false,
   init = function()
     local capabilities = vim.lsp.protocol.make_client_capabilities()
     local ok, blink = pcall(require, "blink.cmp")

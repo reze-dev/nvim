@@ -19,9 +19,11 @@ return {
         "gomod",
         "gowork",
         "gosum",
+        "gotmpl",
         "llvm",
         "make",
         "cmake",
+        "zig",
         "python",
         "lua",
         "luadoc",
@@ -78,23 +80,12 @@ return {
         },
       },
       textobjects = {
+        -- NOTE: `select` is disabled — mini.ai (extras.lua) provides the same
+        -- treesitter queries with better coverage (af/if/ac/ic/aa/ia/...).
         select = {
-          enable = true,
+          enable = false,
           lookahead = true,
-          keymaps = {
-            ["af"] = { query = "@function.outer", desc = "Around function" },
-            ["if"] = { query = "@function.inner", desc = "Inside function" },
-            ["ac"] = { query = "@class.outer", desc = "Around class" },
-            ["ic"] = { query = "@class.inner", desc = "Inside class" },
-            ["aa"] = { query = "@parameter.outer", desc = "Around argument" },
-            ["ia"] = { query = "@parameter.inner", desc = "Inside argument" },
-            ["al"] = { query = "@loop.outer", desc = "Around loop" },
-            ["il"] = { query = "@loop.inner", desc = "Inside loop" },
-            ["ai"] = { query = "@conditional.outer", desc = "Around conditional" },
-            ["ii"] = { query = "@conditional.inner", desc = "Inside conditional" },
-            ["ab"] = { query = "@block.outer", desc = "Around block" },
-            ["ib"] = { query = "@block.inner", desc = "Inside block" },
-          },
+          keymaps = {},
         },
         move = {
           enable = true,

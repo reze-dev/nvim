@@ -23,6 +23,7 @@ return {
       cpp = { "clang-format" },
       rust = { "rustfmt" },
       go = { "goimports", "gofumpt" },
+      zig = { "zigfmt" },
       lua = { "stylua" },
       python = { "ruff_format", "ruff_organize_imports" },
       toml = { "taplo" },

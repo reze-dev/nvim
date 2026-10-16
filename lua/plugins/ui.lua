@@ -63,9 +63,14 @@ return {
   },
 
   -- Noice — modern UI for messages, cmdline, and popups
+  -- NOTE: explicit `config` — lazy.nvim's main-module resolution silently
+  --       skipped `setup` for this spec (noice never activated otherwise).
   {
     "folke/noice.nvim",
     event = "VeryLazy",
+    config = function(_, opts)
+      require("noice").setup(opts)
+    end,
     dependencies = {
       "MunifTanjim/nui.nvim",
       "rcarriga/nvim-notify",
@@ -75,10 +80,11 @@ return {
         override = {
           ["vim.lsp.util.convert_input_to_markdown_lines"] = true,
           ["vim.lsp.util.stylize_markdown"] = true,
-          ["cmp.entry.get_documentation"] = true,
         },
         hover = { enabled = true },
-        signature = { enabled = true },
+        -- blink.cmp owns the automatic signature window (completion.lua);
+        -- keeping noice's would render a second signature popup.
+        signature = { enabled = false },
       },
       presets = {
         bottom_search = true,
@@ -100,7 +106,6 @@ return {
       },
     },
     keys = {
-      { "<leader>sn", "", desc = "+Noice" },
       {
         "<S-Enter>",
         function()
@@ -114,45 +119,6 @@ return {
       { "<leader>sna", function() require("noice").cmd("all") end, desc = "Noice all" },
       { "<leader>snd", function() require("noice").cmd("dismiss") end, desc = "Dismiss all" },
     },
-  },
-
-  -- Notify — better notification UI
-  {
-    "rcarriga/nvim-notify",
-    lazy = true,
-    opts = {
-      stages = "fade_in_slide_out",
-      timeout = 3000,
-      max_height = function()
-        return math.floor(vim.o.lines * 0.75)
-      end,
-      max_width = function()
-        return math.floor(vim.o.columns * 0.75)
-      end,
-      on_open = function(win)
-        vim.api.nvim_win_set_config(win, { zindex = 100 })
-      end,
-      render = "wrapped-compact",
-      top_down = true,
-    },
-  },
-
-  -- Dressing — better vim.ui.select and vim.ui.input
-  {
-    "stevearc/dressing.nvim",
-    lazy = true,
-    init = function()
-      ---@diagnostic disable-next-line: duplicate-set-field
-      vim.ui.select = function(...)
-        require("lazy").load({ plugins = { "dressing.nvim" } })
-        return vim.ui.select(...)
-      end
-      ---@diagnostic disable-next-line: duplicate-set-field
-      vim.ui.input = function(...)
-        require("lazy").load({ plugins = { "dressing.nvim" } })
-        return vim.ui.input(...)
-      end
-    end,
   },
 
   -- Illuminate — highlight word under cursor

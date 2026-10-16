@@ -1,6 +1,6 @@
 # Neovim 0.12 Systems IDE
 
-A high-performance, Lua-native Neovim 0.12 development environment engineered specifically for low-level systems programming in **C++20/23**, **Rust (2021/2024)**, and **Go 1.22+**.
+A high-performance, Lua-native Neovim 0.12 development environment engineered specifically for low-level systems programming in **C++20/23**, **Rust (2021/2024)**, **Go 1.22+**, **Python 3.12+**, and **Zig (0.13+)**.
 
 ---
 
@@ -21,6 +21,7 @@ A high-performance, Lua-native Neovim 0.12 development environment engineered sp
    - [C++: Google Test & CTest Test-Driven Development](#c-google-test--ctest-test-driven-development)
    - [Rust: Cargo Testables, Workspace Filtering & Clippy Invariants](#rust-cargo-testables-workspace-filtering--clippy-invariants)
    - [Go: Table-Driven Tests, Subtests, Race Detection & Profiling](#go-table-driven-tests-subtests-race-detection--profiling)
+   - [Zig: Standard Test Runner & Canonical Formatting](#zig-simple-unit-tests--canonical-formatting)
 4. [Low-Level LLDB Systems Debugging Manual](#4-low-level-lldb-systems-debugging-manual)
    - [Memory Hex Dumps & Data Representation](#memory-hex-dumps--data-representation)
    - [CPU Register Inspection & Architectural Analysis](#cpu-register-inspection--architectural-analysis)
@@ -151,7 +152,7 @@ This configuration is architected as an industrial-grade systems engineering wor
        │
        ├──► Test & Coverage ─────────► Neotest (neotest-golang) / :GoCoverage (<leader>Gc)
        │
-       └──► DAP Debugger ────────────► Delve (`dlv`) via nvim-dap-go (Goroutine Tracing, Stack Dumps)
+        └──► DAP Debugger ────────────► Delve (`dlv`) via dap.lua adapter (Goroutine Tracing, Stack Dumps)
 ```
 
 ---
@@ -221,7 +222,7 @@ High-performance systems engineering requires navigating multi-thousand-line sou
 
 | Key | Mode | Description | Systems Workflow Example |
 | :--- | :---: | :--- | :--- |
-| `s` | `n, x, o` | **2-Character Jump** | Press `s` followed by `fn` to instantly jump to a function definition on any visible line. |
+| `s` | `x, o` | **2-Character Jump** | Press `s` followed by `fn` to instantly jump to a function definition on any visible line. (Normal-mode `s` is left untouched for `nvim-surround`'s `ys`, `cs`, `ds`.) |
 | `S` | `n, x, o` | **Treesitter Jump** | Press `S` to highlight entire AST nodes (loops, structs, functions) and select with one key. |
 | `r` | `o` | **Remote Flash** | Perform an operator remotely without moving the cursor. E.g., `yr` jumps to and yanks a remote struct definition. |
 | `R` | `o, x` | **Treesitter Search** | Search and select Treesitter nodes matching regex across the buffer. |
@@ -248,6 +249,8 @@ The IDE organizes all capabilities into a clean, collision-free `<leader>` hiera
 | `<leader>fk` | Keymaps Reference Picker | `Telescope keymaps` |
 | `<leader>fc` | Neovim Commands Picker | `Telescope commands` |
 | `<leader>fm` | Marks Picker | `Telescope marks` |
+| `<leader>ft` | Find TODO Comments | `:TodoTelescope` |
+| `<leader>fT` | Find TODO / FIX / FIXME | `:TodoTelescope keywords=TODO,FIX,FIXME` |
 | `<leader><leader>` | Resume Last Telescope Search | `Telescope resume` |
 
 #### 2. `<leader>e` — Explorer (Oil.nvim)
@@ -304,10 +307,11 @@ The IDE organizes all capabilities into a clean, collision-free `<leader>` hiera
 | Keybinding | Description | Command / Implementation |
 | :--- | :--- | :--- |
 | `<leader>cf` | Format Buffer / Visual Selection | `conform.format({ lsp_format = "fallback" })` |
-| `<leader>sn` | Swap Parameter with Next Parameter | Treesitter textobject swap |
-| `<leader>sp` | Swap Parameter with Previous Parameter| Treesitter textobject swap |
+| `<leader>cl` | Lint Current Buffer (`:Lint`) | `nvim-lint.try_lint()` |
+| `<leader>cx` | Swap with Next Parameter | Treesitter textobject swap |
+| `<leader>cX` | Swap with Previous Parameter | Treesitter textobject swap |
 
-#### 6. `<leader>r` — Rust (Rustaceanvim)
+#### 7. `<leader>r` — Rust (Rustaceanvim)
 | Keybinding | Description | Command / Implementation |
 | :--- | :--- | :--- |
 | `<leader>rr` | Cargo Runnables Picker | `:RustLsp runnables` |
@@ -323,7 +327,7 @@ The IDE organizes all capabilities into a clean, collision-free `<leader>` hiera
 | `<leader>ra` | Rust-Specific Code Actions | `:RustLsp codeAction` |
 | `<leader>rh` | Rust-Specific Hover Actions | `:RustLsp hover actions` |
 
-#### 7. `<leader>G` — Go (Go.nvim)
+#### 8. `<leader>G` — Go (Go.nvim)
 | Keybinding | Description | Command / Implementation |
 | :--- | :--- | :--- |
 | `<leader>Gt` | Run Package Go Tests | `:GoTest` |
@@ -333,24 +337,28 @@ The IDE organizes all capabilities into a clean, collision-free `<leader>` hiera
 | `<leader>Gr` | Remove Struct Tags | `:GoRmTag` |
 | `<leader>Gi` | Implement Interface Stubs | `:GoImpl` |
 | `<leader>Ge` | Generate `if err != nil` Boilerplate | `:GoIfErr` |
-| `<leader>Gd` | Start Delve Debugger | `:GoDebug` |
-| `<leader>GD` | Stop Delve Debugger | `:GoDebug -s` |
+| `<leader>Gd` | Start Delve Debugger | `dap.continue()` (nvim-dap) |
+| `<leader>GD` | Stop Delve Debugger | `dap.terminate()` (nvim-dap) |
 | `<leader>Gl` | Run golangci-lint | `:GoLint` |
 | `<leader>Gv` | Run `go vet` | `:GoVet` |
 | `<leader>Gg` | Run `go generate` | `:GoGenerate` |
 | `<leader>Gm` | Run `go mod tidy` | `:GoModTidy` |
 
-#### 8. `<leader>t` — Testing (Neotest TDD Suite)
+#### 9. `<leader>t` — Testing (Neotest TDD Suite)
 | Keybinding | Description | Command / Implementation |
 | :--- | :--- | :--- |
 | `<leader>tt` | Run Nearest Test Case | `neotest.run.run()` |
 | `<leader>tf` | Run All Tests in Current File | `neotest.run.run(vim.fn.expand("%"))` |
 | `<leader>ta` | Run Entire Project Test Suite | `neotest.run.run(vim.fn.getcwd())` |
+| `<leader>tw` | Toggle Watch Mode (rerun on save) | `neotest.watch.toggle()` |
+| `<leader>td` | Debug Nearest Test (DAP strategy) | `neotest.run.run({ strategy = "dap" })` |
 | `<leader>ts` | Toggle Test Summary Tree View | `neotest.summary.toggle()` |
 | `<leader>to` | Open Floating Test Output | `neotest.output.open({ enter = true })` |
+| `<leader>tO` | Toggle Test Output Panel | `neotest.output_panel.toggle()` |
+| `<leader>tS` | Stop Running Test(s) | `neotest.run.stop()` |
 | `]T` / `[T` | Jump to Next / Previous Failed Test | `neotest.jump.next/prev({ status = "failed" })` |
 
-#### 9. `<leader>d` — Debugging (nvim-dap & DAP-UI)
+#### 10. `<leader>d` — Debugging (nvim-dap & DAP-UI)
 | Keybinding | Description | Command / Implementation |
 | :--- | :--- | :--- |
 | `<leader>db` | Toggle Breakpoint on Line | `dap.toggle_breakpoint()` |
@@ -368,20 +376,22 @@ The IDE organizes all capabilities into a clean, collision-free `<leader>` hiera
 | `<leader>de` | Evaluate Expression Under Cursor | `dapui.eval()` (Normal & Visual) |
 | `<leader>dw` | Hover Variable Widget | `dap.ui.widgets.hover()` |
 
-#### 10. `<leader>u` — UI, Theme & Feature Toggles
+#### 11. `<leader>u` — UI, Theme & Feature Toggles
 | Keybinding | Description | Command / Implementation |
 | :--- | :--- | :--- |
 | `<leader>ut` | Open Base46 NvChad Theme Selector | `:NvChadTheme` / `base46-themes.pick()` |
+| `<leader>un` | Dismiss All Notifications | `noice.cmd("dismiss")` |
 | `<leader>uh` | Toggle Hardtime Motion Discipline | `hardtime.toggle()` |
 | `<leader>up` | Toggle Precognition Motion Hints | `precognition.toggle()` |
 
-#### 11. `<leader>x` — Trouble & Diagnostics Management
+#### 12. `<leader>x` — Trouble & Diagnostics Management
 | Keybinding | Description | Command / Implementation |
 | :--- | :--- | :--- |
 | `<leader>xx` | Toggle Workspace Diagnostics List | `:Trouble diagnostics toggle` |
 | `<leader>xX` | Toggle Current Buffer Diagnostics | `:Trouble diagnostics toggle filter.buf=0` |
 | `<leader>xs` | Toggle Document Symbols Tree | `:Trouble symbols toggle` |
 | `<leader>xl` | Toggle LSP References & Definitions | `:Trouble lsp toggle` |
+| `<leader>xL` | Toggle Location List | `:Trouble loclist toggle` |
 | `<leader>xQ` | Toggle Quickfix List | `:Trouble qflist toggle` |
 
 ---
@@ -552,7 +562,33 @@ func TestConcurrentQueue(t *testing.T) {
 - **Run Package Tests**: `<leader>Gt` (`:GoTest`) executes `go test ./...` in a non-blocking float terminal.
 - **Run Single Function**: `<leader>Gf` (`:GoTestFunc`) runs the function enclosing the cursor.
 - **Live Coverage Heatmap**: Press `<leader>Gc` (`:GoCoverage`) to toggle line-by-line coverage highlighting directly in the editor buffer (green = covered, red = uncovered).
-- **Delve Test Debugging**: Press `<leader>Gd` (`:GoDebug`) to attach Delve to the current test, stepping across goroutines and inspecting channel states.
+- **Delve Test Debugging**: Press `<leader>Gd` to launch Delve via `dap.continue()` (configs in dap.lua include current file, package, and `mode = "test"` variants), stepping across goroutines and inspecting channel states.
+
+---
+
+### Zig: Simple Unit Tests & Canonical Formatting
+
+Zig support is streamlined around the standard test runner and canonical formatting.
+
+#### 1. Zig Test Execution
+```zig
+const std = @import("std");
+
+test "ring buffer preserves FIFO order" {
+    var buffer: [4]u32 = undefined;
+    var tail: usize = 0;
+    for (0..4) |i| {
+        buffer[tail] = @intCast(i);
+        tail = (tail + 1) % buffer.len;
+    }
+    try std.testing.expectEqual(3, buffer[3]);
+}
+```
+
+**Workflow**: Zig testing has no Neotest adapter; run the standard test binary directly, e.g. `:!zig test %`
+or open a terminal and run `zig test src/main.zig` after `zig build`. Debugging uses the shared CodeLLDB
+configurations; formatting on save runs `zig fmt` through conform.nvim, producing canonical Zig style
+per the official formatter.
 
 ---
 
@@ -904,7 +940,13 @@ The following core components represent the foundational UI invariants of the wo
 - **Clang / LLVM 17+** (including `clangd`, `clang-format`, `clang-tidy`, `lldb`)
 - **Rust Toolchain** (`rustc`, `cargo`, `rust-analyzer`, `rustfmt`, `clippy`)
 - **Go Toolchain 1.22+** (`go`, `gopls`, `dlv`, `golangci-lint`, `gofumpt`)
+- **Python 3.12+** (`basedpyright`, `ruff`, `debugpy` — installed via Mason on first run)
+- **Zig 0.13+** (`zig` provides `zls` discovery and the `zig fmt` formatter used by conform.nvim)
 - **Nerd Font** (e.g., JetBrainsMono Nerd Font)
+
+> Zig language support: `zls` is installed through Mason (server config with `build.zig.zon` root detection),
+> the `zig` treesitter parser is auto-installed, and formatting runs `zig fmt --stdin` via conform.nvim.
+> `commentstring`/commenting needs no plugin — Neovim 0.12 ships built-in treesitter-aware `gc`/`gcc` commenting.
 
 ### Initial Launch & Health Check
 ```bash

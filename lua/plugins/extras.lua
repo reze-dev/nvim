@@ -69,31 +69,12 @@ return {
           }, {}),
           f = ai.gen_spec.treesitter({ a = "@function.outer", i = "@function.inner" }, {}),
           c = ai.gen_spec.treesitter({ a = "@class.outer", i = "@class.inner" }, {}),
+          a = ai.gen_spec.treesitter({ a = "@parameter.outer", i = "@parameter.inner" }, {}),
+          l = ai.gen_spec.treesitter({ a = "@loop.outer", i = "@loop.inner" }, {}),
+          b = ai.gen_spec.treesitter({ a = "@block.outer", i = "@block.inner" }, {}),
         },
       })
     end,
-  },
-
-  -- Better escape
-  {
-    "max397574/better-escape.nvim",
-    event = "InsertEnter",
-    opts = {
-      timeout = 200,
-      default_mappings = false,
-      mappings = {
-        i = {
-          j = {
-            k = "<Esc>",
-          },
-        },
-        c = {
-          j = {
-            k = "<Esc>",
-          },
-        },
-      },
-    },
   },
 
   -- Persistence — session management

@@ -49,21 +49,35 @@ return {
           local name = vim.fn.fnamemodify(path, ":t:r")
           names[#names + 1] = name
         end
-        -- Monoglow is a regular colorscheme, not a Base46 theme, but it can
-        -- still participate in this picker without changing Base46 itself.
-        names[#names + 1] = "monoglow"
         table.sort(names)
         return names
       end
 
       local function apply_theme(name)
-        if name == "monoglow" then
-          vim.cmd.colorscheme("monoglow")
-        else
-          base46.load(name)
-          vim.api.nvim_exec_autocmds("ColorScheme", {})
-        end
+        base46.load(name)
+        vim.api.nvim_exec_autocmds("ColorScheme", {})
       end
+
+      -- nvim-notify has no base46 integration in this version; without a
+      -- background it renders translucent windows and warns on every notify.
+      vim.api.nvim_create_autocmd("ColorScheme", {
+        group = vim.api.nvim_create_augroup("ThemeNotifyBackground", { clear = true }),
+        callback = function()
+          local base46 = require("base46")
+          local ok, colors = pcall(function()
+            return base46.theme_tables[base46.current_theme].base_30
+          end)
+          -- base_30 has no `base` entry in this catalogue; darker_black is the
+          -- page-background depth, which is what a notification backdrop wants.
+          local bg = ok and type(colors) == "table" and (colors.darker_black or colors.black) or nil
+          if not bg then
+            bg = vim.api.nvim_get_hl(0, { name = "Normal", link = false }).bg
+          end
+          if bg then
+            vim.api.nvim_set_hl(0, "NotifyBackground", { bg = type(bg) == "number" and ("#%06x"):format(bg) or bg })
+          end
+        end,
+      })
 
       package.preload["base46-themes"] = function()
         return {
@@ -80,9 +94,9 @@ return {
       end
 
       local saved_theme = theme_state.read_base46_theme()
-      if saved_theme then
-        apply_theme(saved_theme)
-      end
+      -- Fall back to the previous rose-pine aesthetic for fresh installs
+      -- (no persisted theme state yet).
+      apply_theme(saved_theme or "rosepine")
 
       vim.api.nvim_create_user_command("NvChadTheme", function()
         require("base46-themes").pick()

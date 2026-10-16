@@ -69,7 +69,8 @@ return {
     keys = {
       {
         "s",
-        mode = { "n", "x", "o" },
+        -- NOTE: not in normal mode — nvim-surround needs `s` there (ys, cs, ds).
+        mode = { "x", "o" },
         function()
           require("flash").jump()
         end,

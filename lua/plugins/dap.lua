@@ -90,37 +90,33 @@ return {
           virt_text_win_col = nil,
         },
       },
-      -- Go debugger
-      {
-        "leoluz/nvim-dap-go",
-        ft = "go",
-        opts = {},
-        config = function(_, opts)
-          require("dap-go").setup(opts)
-        end,
-      },
       -- Python debugger
       {
         "mfussenegger/nvim-dap-python",
         ft = "python",
         config = function()
-          -- Try to find debugpy
-          local debugpy_path = vim.fn.exepath("python3")
-          require("dap-python").setup(debugpy_path)
+          -- Prefer Mason's debugpy venv (python inside works with debugpy);
+          -- fall back to the system interpreter.
+          local mason_venv =
+            vim.fn.stdpath("data") .. "/mason/packages/debugpy/venv/bin/python"
+          require("dap-python").setup(
+            vim.fn.filereadable(mason_venv) == 1 and mason_venv or vim.fn.exepath("python3")
+          )
         end,
       },
       -- Mason DAP
+      -- NOTE: ALL adapter packages (delve, codelldb, debugpy) are installed by
+      --       mason-tool-installer (tooling.lua). This spec only registers
+      --       adapters for packages already present — setting ensure_installed
+      --       here would double-schedule installs and hit mason.nvim's
+      --       "Package is already installing" assert.
       {
         "jay-babu/mason-nvim-dap.nvim",
         dependencies = { "williamboman/mason.nvim" },
         cmd = { "DapInstall", "DapUninstall" },
         opts = {
-          automatic_installation = true,
-          ensure_installed = {
-            "python",
-            "delve",
-            "codelldb",
-          },
+          automatic_installation = false,
+          ensure_installed = {},
           handlers = {},
         },
       },
@@ -143,10 +139,10 @@ return {
       local dap = require("dap")
 
       -- ── Custom signs ──
-      vim.fn.sign_define("DapBreakpoint", { text = " ", texthl = "DiagnosticError", linehl = "", numhl = "" })
-      vim.fn.sign_define("DapBreakpointCondition", { text = " ", texthl = "DiagnosticWarn", linehl = "", numhl = "" })
-      vim.fn.sign_define("DapBreakpointRejected", { text = " ", texthl = "DiagnosticError", linehl = "", numhl = "" })
-      vim.fn.sign_define("DapLogPoint", { text = " ", texthl = "DiagnosticInfo", linehl = "", numhl = "" })
+      vim.fn.sign_define("DapBreakpoint", { text = "\u{F057} ", texthl = "DiagnosticError", linehl = "", numhl = "" })
+      vim.fn.sign_define("DapBreakpointCondition", { text = "\u{F071} ", texthl = "DiagnosticWarn", linehl = "", numhl = "" })
+      vim.fn.sign_define("DapBreakpointRejected", { text = "\u{EB56} ", texthl = "DiagnosticError", linehl = "", numhl = "" })
+      vim.fn.sign_define("DapLogPoint", { text = "\u{25C6} ", texthl = "DiagnosticInfo", linehl = "", numhl = "" })
       vim.fn.sign_define("DapStopped", { text = "▶ ", texthl = "DiagnosticOk", linehl = "DapStoppedLine", numhl = "" })
 
       -- Highlight for the stopped line

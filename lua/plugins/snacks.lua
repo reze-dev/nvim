@@ -43,12 +43,9 @@ return {
       },
     },
 
-    -- ── Notifier ──
-    notifier = {
-      enabled = true,
-      timeout = 3000,
-      style = "compact",
-    },
+    -- ── Notifier ── handled by noice.nvim + nvim-notify (see ui.lua), so the
+    -- snacks notifier stays off to avoid two frontends fighting over vim.notify.
+    notifier = { enabled = false },
 
     -- ── Quick file ── (fast file opening)
     quickfile = { enabled = true },
@@ -56,21 +53,12 @@ return {
     -- ── Status column ──
     statuscolumn = { enabled = true },
 
-    -- ── Words ── (highlight/navigate references)
-    words = { enabled = true },
-
-    -- ── Styles ──
-    styles = {
-      notification = {
-        wo = { wrap = true },
-      },
-    },
+    -- ── Words ── handled by vim-illuminate (see ui.lua)
+    words = { enabled = false },
   },
   keys = {
-    { "<leader>un", function() Snacks.notifier.hide() end, desc = "Dismiss all notifications" },
+    { "<leader>un", function() require("noice").cmd("dismiss") end, desc = "Dismiss all notifications" },
     { "<leader>gg", function() Snacks.lazygit() end, desc = "Lazygit" },
     { "<leader>gl", function() Snacks.lazygit.log() end, desc = "Lazygit log (cwd)" },
-    { "]]", function() Snacks.words.jump(vim.v.count1) end, desc = "Next reference", mode = { "n", "t" } },
-    { "[[", function() Snacks.words.jump(-vim.v.count1) end, desc = "Previous reference", mode = { "n", "t" } },
   },
 }

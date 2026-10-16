@@ -50,9 +50,6 @@ require("lazy").setup({
     lazy = false,
     version = false,
   },
-  install = {
-    colorscheme = { "rose-pine" },
-  },
   checker = {
     enabled = true,
     notify = false,

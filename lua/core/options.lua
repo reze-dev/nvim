@@ -1,11 +1,18 @@
 -- ─── System Environment & PATH ───────────────────────────────
--- Prepend Mason bin (~/.local/share/nvim/mason/bin), ~/go/bin, and ~/.cargo/bin
+-- Prepend Mason bin (~/.local/share/nvim/mason/bin), ~/go/bin, ~/.cargo/bin,
+-- and ~/.local/bin (user-installed CLI tools such as the tree-sitter CLI).
 local home = vim.env.HOME or vim.fn.expand("~")
 local mason_bin = vim.fn.stdpath("data") .. "/mason/bin"
 local go_bin = home .. "/go/bin"
 local cargo_bin = home .. "/.cargo/bin"
+local local_bin = home .. "/.local/bin"
 
-vim.env.PATH = mason_bin .. ":" .. go_bin .. ":" .. cargo_bin .. ":" .. (vim.env.PATH or "")
+local path_prepend = { mason_bin, go_bin, cargo_bin }
+if vim.uv.fs_stat(local_bin) then
+  path_prepend[#path_prepend + 1] = local_bin
+end
+
+vim.env.PATH = table.concat(path_prepend, ":") .. ":" .. (vim.env.PATH or "")
 
 -- ─── Editor Options ───────────────────────────────────────────
 local opt = vim.opt
@@ -67,7 +74,6 @@ opt.completeopt = { "menu", "menuone", "noselect" }
 opt.confirm = true
 opt.inccommand = "split"
 opt.jumpoptions = "view"
-opt.virtualedit = "block"
 opt.smoothscroll = true
 
 -- Folding (treesitter-based)
