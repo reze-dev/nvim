@@ -108,6 +108,16 @@ autocmd("FileType", {
   end,
 })
 
+-- ─── Filetype detection ──────────────────────────────────────
+-- Neovim's runtime detects compose files as plain yaml; the compose language
+-- service targets `yaml.docker-compose`, so route those files explicitly.
+vim.filetype.add({
+  pattern = {
+    ["docker%-compose*%.ya?ml"] = "yaml.docker-compose",
+    ["compose%.ya?ml"] = "yaml.docker-compose",
+  },
+})
+
 -- Fix conceallevel for json files
 autocmd("FileType", {
   group = augroup("JsonConceal", { clear = true }),

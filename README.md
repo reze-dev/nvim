@@ -1,6 +1,6 @@
 # Neovim 0.12 Systems IDE
 
-A high-performance, Lua-native Neovim 0.12 development environment engineered specifically for low-level systems programming in **C++20/23**, **Rust (2021/2024)**, **Go 1.22+**, **Python 3.12+**, and **Zig (0.13+)**.
+A high-performance, Lua-native Neovim 0.12 development environment engineered specifically for low-level systems programming in **C++20/23**, **Rust (2021/2024)**, **Go 1.22+**, **Python 3.12+**, and **Zig (0.13+)** — plus first-class **YAML / Docker / Terraform** infrastructure support.
 
 ---
 
@@ -941,12 +941,21 @@ The following core components represent the foundational UI invariants of the wo
 - **Rust Toolchain** (`rustc`, `cargo`, `rust-analyzer`, `rustfmt`, `clippy`)
 - **Go Toolchain 1.22+** (`go`, `gopls`, `dlv`, `golangci-lint`, `gofumpt`)
 - **Python 3.12+** (`basedpyright`, `ruff`, `debugpy` — installed via Mason on first run)
-- **Zig 0.13+** (`zig` provides `zls` discovery and the `zig fmt` formatter used by conform.nvim)
+- **Node.js** (`yamlls`, `dockerls`, `docker-compose` language service — installed via Mason)
+- **Zig 0.13+** (`zig` binary drives `zig fmt` via conform.nvim; `zls` is installed by Mason)
+- **Infra tooling**: YAML/Docker/HCL servers, `yamllint`, `hadolint`, `tflint`, `terraform` (all via Mason)
 - **Nerd Font** (e.g., JetBrainsMono Nerd Font)
 
 > Zig language support: `zls` is installed through Mason (server config with `build.zig.zon` root detection),
 > the `zig` treesitter parser is auto-installed, and formatting runs `zig fmt --stdin` via conform.nvim.
 > `commentstring`/commenting needs no plugin — Neovim 0.12 ships built-in treesitter-aware `gc`/`gcc` commenting.
+> If Mason's `zls` build lags your Zig compiler (e.g. Zig 0.16 needs a 0.16-era `zls`), build `zls` from source
+> for that Zig version and Mason's copy will simply be bypassed on PATH.
+>
+> Infrastructure languages: YAML is validated by `yamlls` (schemastore.org schemas) and linted with `yamllint`;
+> Dockerfiles get `dockerls` with `hadolint`, and compose files (`*.docker-compose`) get the compose service;
+> Terraform (`*.tf`, `*.tfvars`) serves via `terraform-ls` with `tflint` diagnostics and `terraform fmt`
+> formatting through conform.nvim.
 
 ### Initial Launch & Health Check
 ```bash

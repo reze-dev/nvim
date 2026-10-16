@@ -41,6 +41,9 @@ return {
         "cssls",
         "jsonls",
         "yamlls",
+        "dockerls", -- Dockerfile
+        "docker_compose_language_service", -- compose YAML
+        "terraformls", -- HashiCorp Configuration Language
         "taplo", -- TOML
         "zls", -- Zig
         -- NOTE: rust-analyzer is NOT here — handled by rustaceanvim
@@ -325,6 +328,17 @@ return {
         root_markers = { "build.zig.zon", "build.zig", "zig-out", "compile_commands.json" },
       })
 
+      -- Dockerfile — docker-language-server, zero-config
+      vim.lsp.config("dockerls", {})
+
+      -- docker-compose files — docker-compose-language-service
+      vim.lsp.config("docker_compose_language_service", {})
+
+      -- Terraform / Terraform vars — terraform-ls
+      vim.lsp.config("terraformls", {
+        filetypes = { "terraform", "terraform-vars", "hcl" },
+      })
+
       -- Enable all servers
       vim.lsp.enable({
         "clangd",
@@ -336,6 +350,9 @@ return {
         "cssls",
         "jsonls",
         "yamlls",
+        "dockerls",
+        "docker_compose_language_service",
+        "terraformls",
         "taplo",
         "zls",
       })

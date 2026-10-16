@@ -9,6 +9,12 @@ return {
         cpp = { "clang-tidy" },
         go = { "golangci-lint" },
         python = { "ruff" },
+        yaml = { "yamllint" },
+        ["yaml.docker-compose"] = { "yamllint" },
+        dockerfile = { "hadolint" },
+        terraform = { "tflint" },
+        ["terraform-vars"] = { "tflint" },
+        hcl = { "tflint" },
       },
     },
     config = function(_, opts)

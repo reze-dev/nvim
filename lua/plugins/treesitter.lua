@@ -46,6 +46,9 @@ return {
         "nix",
         "fish",
         "bash",
+        "dockerfile",
+        "hcl",
+        "terraform",
         -- Docs
         "markdown",
         "markdown_inline",

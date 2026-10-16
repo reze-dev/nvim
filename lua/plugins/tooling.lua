@@ -16,6 +16,10 @@ return {
         "stylua", "ruff", "shfmt", "taplo", "nixfmt",
         "prettier", "clang-format",
         "gofumpt", "goimports", "golangci-lint",
+        -- Infrastructure / DevOps linters and toolchains. Also owns
+        -- terraform-ls: mason-lspconfig's ensure-installer skips headless
+        -- sessions, so the tool-installer is the reliable path for it.
+        "yamllint", "hadolint", "tflint", "terraform", "terraform-ls",
         -- Debug adapters for Go and Rust/C/C++.
         "delve", "codelldb", "debugpy",
       },
