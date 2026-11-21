@@ -102,18 +102,19 @@ autocmd("BufWritePre", {
   group = augroup("TrimWhitespace", { clear = true }),
   pattern = "*",
   callback = function(event)
-    if not vim.g.trim_whitespace then
+    local buf = vim.bo[event.buf]
+    if vim.b[event.buf].bigfile or not vim.g.trim_whitespace or buf.binary or buf.buftype ~= "" or not buf.modifiable then
       return
     end
-    local ft = vim.bo[event.buf].filetype
+    local ft = buf.filetype
     if ft == "markdown" or ft == "gitcommit" or ft == "diff" or ft == "patch" then
       return
     end
-    local view = vim.fn.winsaveview()
-    pcall(function()
-      vim.cmd([[keeppatterns %s/\s\+$//e]])
+    vim.api.nvim_buf_call(event.buf, function()
+      local view = vim.fn.winsaveview()
+      vim.cmd([[silent keepjumps keeppatterns %s/\s\+$//e]])
+      vim.fn.winrestview(view)
     end)
-    vim.fn.winrestview(view)
   end,
 })
 

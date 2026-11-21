@@ -4,6 +4,7 @@ return {
   event = { "BufWritePre" },
   cmd = { "ConformInfo" },
   keys = {
+    { "<leader>uf", "<cmd>FormatToggleBuf<cr>", desc = "Toggle format on save for buffer" },
     {
       "<leader>cf",
       function()
@@ -47,17 +48,16 @@ return {
       fish = { "fish_indent" },
       sh = { "shfmt" },
       bash = { "shfmt" },
-      ["_"] = { "trim_whitespace" },
     },
     format_on_save = function(bufnr)
       -- Disable if buffer variable is set (toggle with :FormatToggle)
-      if vim.b[bufnr].disable_autoformat or vim.g.disable_autoformat then
+      if vim.b[bufnr].bigfile or vim.b[bufnr].disable_autoformat or vim.g.disable_autoformat then
         return
       end
       -- Never auto-format commit messages; markdown hard-breaks are handled
       -- by prettier only on manual <leader>cf.
       local ft = vim.bo[bufnr].filetype
-      if ft == "gitcommit" or ft == "gitrebase" then
+      if ft == "gitcommit" or ft == "gitrebase" or ft == "markdown" then
         return
       end
       return {

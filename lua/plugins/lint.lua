@@ -3,6 +3,7 @@ return {
   {
     "mfussenegger/nvim-lint",
     event = { "BufReadPost", "BufWritePost", "InsertLeave" },
+    cmd = "Lint",
     keys = {
       { "<leader>cl", "<cmd>Lint<cr>", desc = "Lint current buffer" },
     },
@@ -35,9 +36,10 @@ return {
 
       local lint_augroup = vim.api.nvim_create_augroup("NvimLint", { clear = true })
 
-      local function run_lint()
+      local save_only = { ["golangci-lint"] = true, tflint = true }
+      local function run_lint(event)
         local bufnr = vim.api.nvim_get_current_buf()
-        if not vim.api.nvim_buf_is_valid(bufnr) then
+        if event and vim.b[bufnr].bigfile then
           return
         end
         local ft = vim.bo[bufnr].filetype
@@ -51,7 +53,8 @@ return {
 
         local valid_linters = {}
         for _, name in ipairs(linters) do
-          local linter = lint.linters[name]
+          local enabled = not event or event == "BufWritePost" or not save_only[name]
+          local linter = enabled and lint.linters[name]
           if linter then
             local cmd = type(linter) == "table" and linter.cmd or name
             if type(cmd) == "function" then
@@ -74,7 +77,9 @@ return {
 
       vim.api.nvim_create_autocmd({ "BufWritePost", "BufReadPost", "InsertLeave" }, {
         group = lint_augroup,
-        callback = run_lint,
+        callback = function(ev)
+          vim.api.nvim_buf_call(ev.buf, function() run_lint(ev.event) end)
+        end,
       })
 
       -- User command for manual linting (<leader>cl is declared in keys above)
