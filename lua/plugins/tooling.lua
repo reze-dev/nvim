@@ -3,13 +3,9 @@ return {
   {
     "WhoIsSethDaniel/mason-tool-installer.nvim",
     dependencies = { "mason-org/mason.nvim" },
-    event = "VeryLazy",
-    cmd = { "MasonToolsInstall", "MasonToolsUpdate", "MasonToolsInstallSync", "MasonToolsUpdateSync", "MasonToolsClean" },
+    lazy = false, -- Register the installer before VimEnter.
     -- Set NVIM_SKIP_MASON_INSTALL=1 (e.g. in CI or headless verification) to
     -- skip the startup tool-install check.
-    cond = function()
-      return vim.env.NVIM_SKIP_MASON_INSTALL == nil
-    end,
     opts = {
       ensure_installed = {
         -- Formatters and linters used by conform.nvim / gopls.
@@ -22,11 +18,9 @@ return {
         "yamllint", "hadolint", "tflint", "terraform", "terraform-ls",
         -- Debug adapters for Go and Rust/C/C++.
         "delve", "codelldb", "debugpy",
-        -- TUI git client used by snacks.lazygit (<leader>gg/gl).
-        "lazygit",
       },
       auto_update = false,
-      run_on_start = true,
+      run_on_start = vim.env.NVIM_SKIP_MASON_INSTALL == nil,
       start_delay = 3000,
     },
   },

@@ -6,7 +6,7 @@ return {
       "nvim-lua/plenary.nvim",
       "nvim-neotest/nvim-nio",
       "nvim-treesitter/nvim-treesitter",
-      { "mrcjkb/rustaceanvim", version = "^5" },
+      "mrcjkb/rustaceanvim",
       { "fredrikaverpil/neotest-golang" },
       { "alfaix/neotest-gtest" },
     },
@@ -25,32 +25,15 @@ return {
       { "[T", function() require("neotest").jump.prev({ status = "failed" }) end, desc = "Test: jump previous failed" },
     },
     opts = function()
-      -- Adapters: rustaceanvim (Rust), neotest-golang (Go), neotest-gtest (C++)
-      local adapters = {}
-
-      local ok_rust, rustacean_neotest = pcall(require, "rustaceanvim.neotest")
-      if ok_rust then
-        table.insert(adapters, rustacean_neotest)
-      end
-
-      local ok_golang, neotest_golang = pcall(require, "neotest-golang")
-      if ok_golang then
-        table.insert(
-          adapters,
-          neotest_golang({
+      return {
+        adapters = {
+          require("rustaceanvim.neotest"),
+          require("neotest-golang")({
             runner = "go",
             go_test_args = { "-v", "-race", "-count=1" },
-          })
-        )
-      end
-
-      local ok_gtest, neotest_gtest = pcall(require, "neotest-gtest")
-      if ok_gtest then
-        table.insert(adapters, neotest_gtest({}))
-      end
-
-      return {
-        adapters = adapters,
+          }),
+          require("neotest-gtest").setup({}),
+        },
         status = { virtual_text = true, signs = true },
         output = { open_on_run = true },
         output_panel = { open_on_run = false },

@@ -3,8 +3,8 @@
 -- through nvim-lspconfig — rustaceanvim handles everything.
 return {
   "mrcjkb/rustaceanvim",
-  version = "^5",
-  ft = { "rust" },
+  version = "^9",
+  lazy = false, -- rustaceanvim loads its server through the Rust ftplugin.
   init = function()
     local capabilities = vim.lsp.protocol.make_client_capabilities()
     local ok, blink = pcall(require, "blink.cmp")
@@ -14,9 +14,6 @@ return {
 
     vim.g.rustaceanvim = {
       tools = {
-        hover_actions = {
-          replace_builtin_hover = false,
-        },
         float_win_config = {
           border = "rounded",
         },
@@ -49,12 +46,11 @@ return {
         default_settings = {
           ["rust-analyzer"] = {
             cargo = {
-              allFeatures = true,
-              loadOutDirsFromCheck = true,
+              features = "all",
               buildScripts = { enable = true },
             },
+            checkOnSave = true,
             check = {
-              enable = true,
               command = "clippy",
               extraArgs = { "--no-deps" },
             },
@@ -84,26 +80,6 @@ return {
             },
           },
         },
-      },
-      dap = {
-        -- DAP configuration — auto-detect codelldb
-        adapter = function()
-          local cfg = require("rustaceanvim.config")
-          -- Try mason path first, then system
-          local mason_path = vim.fn.stdpath("data") .. "/mason/packages/codelldb"
-          local codelldb_path = mason_path .. "/extension/adapter/codelldb"
-          local ext = mason_path .. "/extension/lldb/lib/liblldb"
-          local lib_ext = vim.uv.os_uname().sysname == "Darwin" and ".dylib" or ".so"
-          local liblldb_path = ext .. lib_ext
-
-          if vim.fn.filereadable(codelldb_path) == 1 then
-            local lib = vim.fn.filereadable(liblldb_path) == 1 and liblldb_path or nil
-            return cfg.get_codelldb_adapter(codelldb_path, lib)
-          else
-            -- Fall back to system codelldb
-            return cfg.get_codelldb_adapter("codelldb", nil)
-          end
-        end,
       },
     }
   end,

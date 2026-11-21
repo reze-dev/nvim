@@ -50,7 +50,7 @@ return {
         -- NOTE: clangd is NOT here on NixOS (use system clangd); add it
         -- here on other distros if you want Mason to own it.
       },
-      automatic_enable = true,
+      automatic_enable = { exclude = { "rust_analyzer" } },
     },
     config = function(_, opts)
       require("mason-lspconfig").setup(opts)
@@ -114,6 +114,7 @@ return {
           -- Actions
           map("<leader>ca", vim.lsp.buf.code_action, "Code action", { "n", "v" })
           map("<leader>rn", vim.lsp.buf.rename, "Rename symbol")
+          map("<F2>", vim.lsp.buf.rename, "Rename symbol")
 
           -- Diagnostics
           map("<leader>ld", vim.diagnostic.open_float, "Line diagnostics")
@@ -138,7 +139,7 @@ return {
           end, "List workspace folders")
 
           -- Inlay hints (Neovim 0.10+)
-          if client:supports_method("textDocument/inlayHint", { bufnr = bufnr }) then
+          if client:supports_method("textDocument/inlayHint", bufnr) then
             vim.lsp.inlay_hint.enable(true, { bufnr = bufnr })
             map("<leader>lh", function()
               vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled({ bufnr = bufnr }), { bufnr = bufnr })
@@ -146,12 +147,14 @@ return {
           end
 
           -- Codelens
-          if client:supports_method("textDocument/codeLens", { bufnr = bufnr }) then
+          if client:supports_method("textDocument/codeLens", bufnr) then
             map("<leader>ll", vim.lsp.codelens.run, "Run codelens")
-            map("<leader>lL", vim.lsp.codelens.refresh, "Refresh codelens")
+            map("<leader>lL", function()
+              vim.lsp.codelens.enable(true, { bufnr = bufnr })
+            end, "Refresh codelens")
           end
 
-          if client:supports_method("textDocument/documentHighlight", { bufnr = bufnr }) then
+          if client:supports_method("textDocument/documentHighlight", bufnr) then
             local group = vim.api.nvim_create_augroup("LspDocumentHighlight", { clear = false })
             vim.api.nvim_clear_autocmds({ group = group, buffer = bufnr })
             vim.api.nvim_create_autocmd({ "CursorHold", "CursorHoldI" }, {
