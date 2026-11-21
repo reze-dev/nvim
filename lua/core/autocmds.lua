@@ -61,7 +61,6 @@ autocmd("FileType", {
     "neotest-output-panel",
     "neotest-summary",
     "notify",
-    "oil",
     "qf",
     "snacks_win",
     "spectre_panel",

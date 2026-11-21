@@ -34,13 +34,13 @@ map("n", "<C-Right>", "<cmd>vertical resize +2<cr>", { desc = "Increase window w
 -- Window splits (QoL)
 map("n", "<leader>|", "<cmd>vsplit<cr>", { desc = "Vertical split" })
 map("n", "<leader>-", "<cmd>split<cr>", { desc = "Horizontal split" })
-map("n", "<leader>wd", "<cmd>close<cr>", { desc = "Close window" })
+map("n", "<leader>qw", "<cmd>close<cr>", { desc = "Close window" })
 
 -- Buffer navigation (<S-h>/<S-l> shadow H/L top/bottom — intentional)
 map("n", "<S-h>", "<cmd>bprevious<cr>", { desc = "Previous buffer" })
 map("n", "<S-l>", "<cmd>bnext<cr>", { desc = "Next buffer" })
-map("n", "<leader>bd", "<cmd>bdelete<cr>", { desc = "Close buffer" })
-map("n", "<leader>bD", "<cmd>bdelete!<cr>", { desc = "Force close buffer" })
+map("n", "<leader>bd", function() Snacks.bufdelete() end, { desc = "Close buffer, keep split" })
+map("n", "<leader>bD", function() Snacks.bufdelete({ force = true }) end, { desc = "Force close buffer, keep split" })
 
 -- Move lines up/down in visual mode
 map("v", "J", ":<C-u>m '>+1<cr>gv=gv", { desc = "Move selection down" })

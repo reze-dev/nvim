@@ -22,26 +22,9 @@ return {
           { icon = "\u{F12E} ", key = "L", desc = "Lazy", action = ":Lazy" },
           { icon = "\u{F011} ", key = "q", desc = "Quit", action = ":qa" },
         },
-        header = [[
-                                                                               
-                                                                               
-                                                                            
-              ████ ██████           █████      ██                     
-             ███████████             █████                             
-             █████████ ███████████████████ ███   ███████████   
-            █████████  ███    █████████████ █████ ██████████████   
-           █████████ ██████████ █████████ █████ █████ ████ █████   
-         ███████████ ███    ███ █████████ █████ █████ ████ █████  
-        ██████  █████████████████████ ████ █████ █████ ████ ██████ 
-                                                                              
-                                                                                      
-                                                                               
-                                                                             
-                                                                               
-        ]],
       },
       sections = {
-        { pane = 1, section = "header", padding = 2 },
+        { pane = 1, section = "header" },
         { pane = 1, section = "startup", padding = 1 },
         { pane = 2, section = "keys", gap = 1, padding = 1 },
       },
@@ -68,6 +51,8 @@ return {
     words = { enabled = false },
   },
   keys = {
+    { "<C-/>", function() Snacks.terminal.toggle() end, mode = { "n", "t" }, desc = "Toggle terminal" },
+    { "<leader>f/", function() Snacks.picker.lines() end, desc = "Find line in buffer" },
     -- Find & picker (ex-telescope bindings, now Snacks)
     { "<leader>ff", function() Snacks.picker.files({ hidden = true }) end, desc = "Find files" },
     { "<leader>fg", function() Snacks.picker.grep() end, desc = "Live grep" },
