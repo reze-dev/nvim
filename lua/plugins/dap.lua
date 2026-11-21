@@ -7,6 +7,7 @@ return {
       -- Modern debugger UI (replaces archived rcarriga/nvim-dap-ui)
       {
         "igorlfs/nvim-dap-view",
+        version = "1.3.0",
         keys = {
           { "<leader>du", "<cmd>DapViewToggle<cr>", desc = "DAP: toggle UI" },
           {
@@ -18,10 +19,10 @@ return {
             mode = { "n", "v" },
           },
         },
-        cmd = { "DapViewToggle", "DapViewWatch", "DapViewJump" },
+        cmd = { "DapViewOpen", "DapViewToggle", "DapViewWatch", "DapViewJump" },
         opts = {
           winbar = { show = true },
-          windows = { height = 12 },
+          windows = { size = 12 },
           auto_toggle = true,
         },
       },
@@ -69,6 +70,11 @@ return {
       -- mason-tool-installer (tooling.lua). An empty handlers spec would be dead.
     },
     keys = {
+      { "<F5>", function() require("dap").continue() end, desc = "Debug: start or continue" },
+      { "<F9>", function() require("dap").toggle_breakpoint() end, desc = "Debug: toggle breakpoint" },
+      { "<F10>", function() require("dap").step_over() end, desc = "Debug: step over" },
+      { "<F11>", function() require("dap").step_into() end, desc = "Debug: step into" },
+      { "<S-F11>", function() require("dap").step_out() end, desc = "Debug: step out" },
       { "<leader>db", function() require("dap").toggle_breakpoint() end, desc = "DAP: toggle breakpoint" },
       { "<leader>dB", function() require("dap").set_breakpoint(vim.fn.input("Breakpoint condition: ")) end, desc = "DAP: conditional breakpoint" },
       { "<leader>dc", function() require("dap").continue() end, desc = "DAP: continue" },
@@ -84,11 +90,15 @@ return {
     },
     config = function()
       local dap = require("dap")
+      local project_root = require("core.project").root
+      local function arguments()
+        return require("dap.utils").splitstr(vim.fn.input("Arguments: "))
+      end
 
       -- ── Custom signs ──
-      vim.fn.sign_define("DapBreakpoint", { text = " ", texthl = "DiagnosticError", linehl = "", numhl = "" })
-      vim.fn.sign_define("DapBreakpointCondition", { text = " ", texthl = "DiagnosticWarn", linehl = "", numhl = "" })
-      vim.fn.sign_define("DapBreakpointRejected", { text = " ", texthl = "DiagnosticError", linehl = "", numhl = "" })
+      vim.fn.sign_define("DapBreakpoint", { text = "●", texthl = "DiagnosticError", linehl = "", numhl = "" })
+      vim.fn.sign_define("DapBreakpointCondition", { text = "◆", texthl = "DiagnosticWarn", linehl = "", numhl = "" })
+      vim.fn.sign_define("DapBreakpointRejected", { text = "×", texthl = "DiagnosticError", linehl = "", numhl = "" })
       vim.fn.sign_define("DapLogPoint", { text = "◆ ", texthl = "DiagnosticInfo", linehl = "", numhl = "" })
       vim.fn.sign_define("DapStopped", { text = "▶ ", texthl = "DiagnosticOk", linehl = "DapStoppedLine", numhl = "" })
 
@@ -119,13 +129,14 @@ return {
 
       -- ── Executable Discovery & Selection Helper ──
       local function get_binary()
-        local cwd = vim.fn.getcwd()
+        local cwd = project_root()
         local candidates = {}
         local seen = {}
 
         local search_dirs = {
           "target/debug",
           "target/release",
+          "zig-out/bin",
           "build",
           "build/bin",
           "bin",
@@ -223,7 +234,7 @@ return {
             type = "codelldb",
             request = "launch",
             program = get_binary,
-            cwd = "${workspaceFolder}",
+            cwd = project_root,
             stopOnEntry = false,
             args = {},
           },
@@ -232,15 +243,9 @@ return {
             type = "codelldb",
             request = "launch",
             program = get_binary,
-            cwd = "${workspaceFolder}",
+            cwd = project_root,
             stopOnEntry = false,
-            args = function()
-              local args_str = vim.fn.input("Arguments: ")
-              if args_str == "" then
-                return {}
-              end
-              return vim.split(args_str, "%s+", { trimempty = true })
-            end,
+            args = arguments,
           },
           {
             name = "Attach to Process",
@@ -249,7 +254,7 @@ return {
             pid = function()
               return require("dap.utils").pick_process()
             end,
-            cwd = "${workspaceFolder}",
+            cwd = project_root,
           },
           {
             name = "Load Core Dump",
@@ -257,10 +262,10 @@ return {
             request = "attach",
             program = get_binary,
             coreDumpPath = function()
-              local core_path = vim.fn.input("Path to core dump: ", vim.fn.getcwd() .. "/", "file")
+              local core_path = vim.fn.input("Path to core dump: ", project_root() .. "/", "file")
               return core_path ~= "" and core_path or nil
             end,
-            cwd = "${workspaceFolder}",
+            cwd = project_root,
           },
         }
       end
@@ -268,6 +273,7 @@ return {
       -- Deep-copied per filetype so per-launch mutations don't leak across ft
       dap.configurations.cpp = codelldb_configs()
       dap.configurations.c = codelldb_configs()
+      dap.configurations.zig = codelldb_configs()
       dap.configurations.rust = codelldb_configs()
 
       -- ── Delve (Go) Adapter & Configurations ──
@@ -292,31 +298,29 @@ return {
       dap.configurations.go = {
         {
           type = "delve",
+          cwd = project_root,
           name = "Debug (Smart Picker / Current File)",
           request = "launch",
           program = "${file}",
         },
         {
           type = "delve",
+          cwd = project_root,
           name = "Debug Package",
           request = "launch",
           program = "${fileDirname}",
         },
         {
           type = "delve",
+          cwd = project_root,
           name = "Debug with Arguments",
           request = "launch",
           program = "${file}",
-          args = function()
-            local args_str = vim.fn.input("Arguments: ")
-            if args_str == "" then
-              return {}
-            end
-            return vim.split(args_str, "%s+", { trimempty = true })
-          end,
+          args = arguments,
         },
         {
           type = "delve",
+          cwd = project_root,
           name = "Debug Test",
           request = "launch",
           mode = "test",
@@ -324,13 +328,15 @@ return {
         },
         {
           type = "delve",
+          cwd = project_root,
           name = "Debug Test (Package)",
           request = "launch",
           mode = "test",
-          program = "./${relativeFileDirname}",
+          program = "${fileDirname}",
         },
         {
           type = "delve",
+          cwd = project_root,
           name = "Attach to Process",
           request = "attach",
           mode = "local",
