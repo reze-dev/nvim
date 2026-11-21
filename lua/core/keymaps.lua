@@ -11,11 +11,12 @@ end
 -- Better escape
 map("i", "jk", "<ESC>", { desc = "Exit insert mode" })
 
--- Save & quit (note: <leader>q is a prefix for <leader>qs/ql/qd session keys,
--- so there is a short timeoutlen delay by design)
 map("n", "<leader>w", "<cmd>w<cr>", { desc = "Save file" })
 map("n", "<leader>qq", "<cmd>q<cr>", { desc = "Quit window" })
 map("n", "<leader>Q", "<cmd>confirm qa<cr>", { desc = "Quit all (confirm)" })
+
+vim.api.nvim_create_user_command("Build", function() require("core.build").run() end, { desc = "Build current project" })
+map("n", "<leader>cb", "<cmd>Build<cr>", { desc = "Build project" })
 
 -- Clear search highlights (also <Esc> in normal mode)
 map("n", "<leader>nh", "<cmd>nohlsearch<cr>", { desc = "Clear search highlights" })

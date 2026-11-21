@@ -14,7 +14,7 @@ return {
     keys = {
       { "<leader>tt", function() require("neotest").run.run() end, desc = "Test: run nearest" },
       { "<leader>tf", function() require("neotest").run.run(vim.fn.expand("%")) end, desc = "Test: run current file" },
-      { "<leader>ta", function() require("neotest").run.run(vim.fn.getcwd()) end, desc = "Test: run all (project)" },
+      { "<leader>ta", function() require("neotest").run.run(require("core.project").root()) end, desc = "Test: run all (project)" },
       { "<leader>tw", function() require("neotest").watch.toggle() end, desc = "Test: toggle watch mode" },
       { "<leader>td", function() require("neotest").run.run({ strategy = "dap" }) end, desc = "Test: debug nearest (DAP)" },
       { "<leader>ts", function() require("neotest").summary.toggle() end, desc = "Test: toggle summary" },
