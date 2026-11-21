@@ -234,24 +234,25 @@ High-performance systems engineering requires navigating multi-thousand-line sou
 
 The IDE organizes all capabilities into a clean, collision-free `<leader>` hierarchy (Leader = `Space`).
 
-#### 1. `<leader>f` — Find & Telescope Fuzzy Discovery
+#### 1. `<leader>f` — Find with Snacks
 | Keybinding | Description | Command / Implementation |
 | :--- | :--- | :--- |
-| `<leader>ff` | Find Files (including hidden) | `Telescope find_files` |
-| `<leader>fg` | Live Grep (Ripgrep across workspace) | `Telescope live_grep` |
-| `<leader>fb` | Find Active Buffers | `Telescope buffers` |
-| `<leader>fd` | Workspace Diagnostics | `Telescope diagnostics` |
-| `<leader>fw` | Find Word Under Cursor | `Telescope grep_string` |
-| `<leader>fs` | Document LSP Symbols | `Telescope lsp_document_symbols` |
-| `<leader>fS` | Workspace LSP Symbols | `Telescope lsp_workspace_symbols` |
-| `<leader>fr` | Recent Files (oldfiles) | `Telescope oldfiles` |
-| `<leader>fh` | Help Tags & Documentation | `Telescope help_tags` |
-| `<leader>fk` | Keymaps Reference Picker | `Telescope keymaps` |
-| `<leader>fc` | Neovim Commands Picker | `Telescope commands` |
-| `<leader>fm` | Marks Picker | `Telescope marks` |
-| `<leader>ft` | Find TODO Comments | `:TodoTelescope` |
-| `<leader>fT` | Find TODO / FIX / FIXME | `:TodoTelescope keywords=TODO,FIX,FIXME` |
-| `<leader><leader>` | Resume Last Telescope Search | `Telescope resume` |
+| `<leader>f/` | Find a line in this buffer | `Snacks.picker.lines()` |
+| `<leader>ff` | Find Files (including hidden) | `Snacks.picker.files()` |
+| `<leader>fg` | Live Grep (Ripgrep across workspace) | `Snacks.picker.grep()` |
+| `<leader>fb` | Find Active Buffers | `Snacks.picker.buffers()` |
+| `<leader>fd` | Workspace Diagnostics | `Snacks.picker.diagnostics()` |
+| `<leader>fw` | Find Word Under Cursor | `Snacks.picker.grep_word()` |
+| `<leader>fs` | Document LSP Symbols | `Snacks.picker.lsp_symbols()` |
+| `<leader>fS` | Workspace LSP Symbols | `Snacks.picker.lsp_workspace_symbols()` |
+| `<leader>fr` | Recent Files (oldfiles) | `Snacks.picker.recent()` |
+| `<leader>fh` | Help Tags & Documentation | `Snacks.picker.help()` |
+| `<leader>fk` | Keymaps Reference Picker | `Snacks.picker.keymaps()` |
+| `<leader>fc` | Neovim Commands Picker | `Snacks.picker.commands()` |
+| `<leader>fm` | Marks Picker | `Snacks.picker.marks()` |
+| `<leader>ft` | Find TODO Comments | `:TodoTrouble` |
+| `<leader>fT` | Find TODO / FIX / FIXME | `:TodoQuickFix keywords=TODO,FIX,FIXME` |
+| `<leader><leader>` | Resume Last Search | `Snacks.picker.resume()` |
 
 #### 2. `<leader>e` — Explorer (Oil.nvim)
 | Keybinding | Description | Command / Implementation |
@@ -282,7 +283,7 @@ The IDE organizes all capabilities into a clean, collision-free `<leader>` hiera
 | `K` | Hover Documentation | `vim.lsp.buf.hover()` |
 | `<C-S-k>` | Parameter Signature Help (Normal & Insert) | `vim.lsp.buf.signature_help()` |
 | `<leader>ca` | Code Actions (Quick fixes, refactors) | `vim.lsp.buf.code_action()` |
-| `<leader>rn` | Rename Symbol Across Project | `vim.lsp.buf.rename()` |
+| `<leader>rn` / `F2` | Rename Symbol Across Project | `vim.lsp.buf.rename()` |
 | `<leader>ld` | Show Line Diagnostics Float Window | `vim.diagnostic.open_float()` |
 | `]d` / `[d` | Next / Previous Diagnostic Item | `vim.diagnostic.jump()` |
 | `]e` / `[e` | Next / Previous Error Only | `vim.diagnostic.jump(severity=ERROR)` |
@@ -290,7 +291,7 @@ The IDE organizes all capabilities into a clean, collision-free `<leader>` hiera
 | `<leader>li` | View Incoming Calls (Call Hierarchy) | `vim.lsp.buf.incoming_calls()` |
 | `<leader>lo` | View Outgoing Calls (Call Hierarchy) | `vim.lsp.buf.outgoing_calls()` |
 | `<leader>ll` | Run Codelens Under Cursor | `vim.lsp.codelens.run()` |
-| `<leader>lL` | Refresh Buffer Codelenses | `vim.lsp.codelens.refresh()` |
+| `<leader>lL` | Refresh Buffer Codelenses | `vim.lsp.codelens.enable()` |
 
 #### 5. Autocompletion & Snippets (Blink.cmp)
 | Keybinding | Description | Action |
@@ -306,10 +307,18 @@ The IDE organizes all capabilities into a clean, collision-free `<leader>` hiera
 #### 6. `<leader>c` — Code, Formatting & Parameter Swaps
 | Keybinding | Description | Command / Implementation |
 | :--- | :--- | :--- |
+| `<leader>cb` | Build the current project asynchronously | Compiler output in quickfix |
 | `<leader>cf` | Format Buffer / Visual Selection | `conform.format({ lsp_format = "fallback" })` |
 | `<leader>cl` | Lint Current Buffer (`:Lint`) | `nvim-lint.try_lint()` |
+| `<leader>uf` | Toggle automatic formatting for this buffer | `:FormatToggleBuf` |
+| `Ctrl-Space` / `Backspace` | Expand / shrink a syntax selection | Tree-sitter parent / child |
+| `Ctrl-/` | Open or hide the terminal in the current working directory | `Snacks.terminal.toggle()` |
 | `<leader>cx` | Swap with Next Parameter | Treesitter textobject swap |
 | `<leader>cX` | Swap with Previous Parameter | Treesitter textobject swap |
+
+`:Build` and `Space c b` build saved files. Cargo, Go and Zig run from the nearest project manifest. CMake uses an existing build tree in `build`, `cmake-build-debug`, `cmake-build-release`, or the source directory. For another configured tree, set `:let b:cmake_build_dir = '/absolute/path/to/build'` in the source buffer. Use `:copen` to see build output and `[q` / `]q` to jump between compiler locations.
+
+`Space w` saves immediately. `Space q w` closes the current window. Go and Terraform lint on save or with `Space c l`. Files over 1 MiB skip automatic linting, formatting and whitespace trimming. Manual format and lint commands remain available.
 
 #### 7. `<leader>r` — Rust (Rustaceanvim)
 | Keybinding | Description | Command / Implementation |
@@ -349,7 +358,7 @@ The IDE organizes all capabilities into a clean, collision-free `<leader>` hiera
 | :--- | :--- | :--- |
 | `<leader>tt` | Run Nearest Test Case | `neotest.run.run()` |
 | `<leader>tf` | Run All Tests in Current File | `neotest.run.run(vim.fn.expand("%"))` |
-| `<leader>ta` | Run Entire Project Test Suite | `neotest.run.run(vim.fn.getcwd())` |
+| `<leader>ta` | Run Entire Project Test Suite | Current buffer’s project or Cargo workspace root |
 | `<leader>tw` | Toggle Watch Mode (rerun on save) | `neotest.watch.toggle()` |
 | `<leader>td` | Debug Nearest Test (DAP strategy) | `neotest.run.run({ strategy = "dap" })` |
 | `<leader>ts` | Toggle Test Summary Tree View | `neotest.summary.toggle()` |
@@ -361,19 +370,19 @@ The IDE organizes all capabilities into a clean, collision-free `<leader>` hiera
 #### 10. `<leader>d` — Debugging (nvim-dap & DAP-UI)
 | Keybinding | Description | Command / Implementation |
 | :--- | :--- | :--- |
-| `<leader>db` | Toggle Breakpoint on Line | `dap.toggle_breakpoint()` |
+| `<leader>db` / `F9` | Toggle Breakpoint on Line | `dap.toggle_breakpoint()` |
 | `<leader>dB` | Set Conditional Breakpoint | `dap.set_breakpoint(prompt)` |
-| `<leader>dc` | Continue / Launch Target | `dap.continue()` |
+| `<leader>dc` / `F5` | Continue / Launch Target | `dap.continue()` |
 | `<leader>dC` | Run to Cursor | `dap.run_to_cursor()` |
-| `<leader>di` | Step Into Instruction / Function | `dap.step_into()` |
-| `<leader>do` | Step Over Instruction / Function | `dap.step_over()` |
-| `<leader>dO` | Step Out of Current Stack Frame | `dap.step_out()` |
+| `<leader>di` / `F11` | Step Into Instruction / Function | `dap.step_into()` |
+| `<leader>do` / `F10` | Step Over Instruction / Function | `dap.step_over()` |
+| `<leader>dO` / `Shift-F11` | Step Out of Current Stack Frame | `dap.step_out()` |
 | `<leader>dp` | Pause Target Execution | `dap.pause()` |
 | `<leader>dr` | Restart Debugging Session | `dap.restart()` |
 | `<leader>dl` | Run Last Debug Configuration | `dap.run_last()` |
 | `<leader>dt` | Terminate Debug Session | `dap.terminate()` |
-| `<leader>du` | Toggle DAP-UI Layout | `dapui.toggle({})` |
-| `<leader>de` | Evaluate Expression Under Cursor | `dapui.eval()` (Normal & Visual) |
+| `<leader>du` | Toggle debugger panel | `:DapViewToggle` |
+| `<leader>de` | Watch expression under cursor or selection | `require("dap-view").add_expr()` |
 | `<leader>dw` | Hover Variable Widget | `dap.ui.widgets.hover()` |
 
 #### 11. `<leader>u` — UI, Theme & Feature Toggles
@@ -956,6 +965,14 @@ The following core components represent the foundational UI invariants of the wo
 > Dockerfiles get `dockerls` with `hadolint`, and compose files (`*.docker-compose`) get the compose service;
 > Terraform (`*.tf`, `*.tfvars`) serves via `terraform-ls` with `tflint` diagnostics and `terraform fmt`
 > formatting through conform.nvim.
+
+### Plugin smoke check
+
+After a plugin update, run this command in a shell. It checks the three Neotest adapters, accesses a Harpoon list, opens DAP View, and exits with a failure status if a check fails.
+
+```sh
+NVIM_SKIP_MASON_INSTALL=1 nvim --headless -i NONE '+lua dofile(vim.fn.stdpath("config") .. "/scripts/smoke.lua")'
+```
 
 ### Initial Launch & Health Check
 ```bash
